@@ -10,7 +10,7 @@ if not defined DEPLOY_PORT set "DEPLOY_PORT=22"
 if not defined DEPLOY_USER set "DEPLOY_USER=srimuang"
 if not defined DEPLOY_DIR  set "DEPLOY_DIR=/var/www/html/hp-registry"
 if not defined DEPLOY_APP  set "DEPLOY_APP=hp-registry"
-rem เข้าสู่ระบบด้วยกุญแจ SSH (ตั้งค่าครั้งเดียวด้วย setup-deploy-key.bat) จึงไม่ต้องกรอกรหัสผ่าน
+rem รหัสผ่านไม่เก็บในไฟล์: ตั้ง DEPLOY_PASSWORD ไว้ก่อนรัน หรือกรอกเมื่อถูกถาม
 
 rem ---- สีตัวอักษร (ANSI) ----
 for /f %%e in ('echo prompt $E^| cmd') do set "ESC=%%e"
@@ -30,16 +30,18 @@ echo %C_DIM%   ปลายทาง : %DEPLOY_USER%@%DEPLOY_HOST%:%DEPLOY_DIR%%
 echo %C_DIM%   โปรเซส  : pm2 / %DEPLOY_APP%%C_RST%
 echo.
 
-set "SSH=%SystemRoot%\System32\OpenSSH\ssh.exe"
-set "SCP=%SystemRoot%\System32\OpenSSH\scp.exe"
 set "TAR=%SystemRoot%\System32\tar.exe"
-set "KEY=%USERPROFILE%\.ssh\hp-registry-deploy"
-set "SSHOPT=-i "%KEY%" -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
+set "PLINK=C:\Program Files\PuTTY\plink.exe"
+set "PSCP=C:\Program Files\PuTTY\pscp.exe"
 
 where node >nul 2>nul || (call :fail "ไม่พบ Node.js ในเครื่องนี้ กรุณาติดตั้งก่อน" & exit /b 1)
 if not exist "%TAR%" (call :fail "ไม่พบ tar.exe ของ Windows" & exit /b 1)
-if not exist "%SSH%" (call :fail "ไม่พบ OpenSSH ของ Windows" & exit /b 1)
-if not exist "%KEY%" (call :fail "ยังไม่ได้ตั้งค่ากุญแจ SSH กรุณารัน setup-deploy-key.bat หนึ่งครั้งก่อน" & exit /b 1)
+if not exist "%PLINK%" (call :fail "ไม่พบโปรแกรม PuTTY (plink/pscp) ที่ C:\Program Files\PuTTY" & exit /b 1)
+
+if not defined DEPLOY_PASSWORD (
+  for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "$s = Read-Host 'กรอกรหัสผ่าน SSH ของผู้ใช้ %DEPLOY_USER%' -AsSecureString; [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($s))"`) do set "DEPLOY_PASSWORD=%%P"
+)
+if not defined DEPLOY_PASSWORD (call :fail "ไม่ได้กรอกรหัสผ่าน" & exit /b 1)
 
 call :step "1/5" "สร้างหน้าเว็บ (Build)"
 call npm run build
@@ -54,20 +56,22 @@ if errorlevel 1 (call :fail "รวมไฟล์ไม่สำเร็จ" &
 call :ok "รวมไฟล์เรียบร้อย"
 
 call :step "3/5" "เชื่อมต่อเซิร์ฟเวอร์"
-"%SSH%" %SSHOPT% -p %DEPLOY_PORT% %DEPLOY_USER%@%DEPLOY_HOST% "mkdir -p %DEPLOY_DIR%"
-if errorlevel 1 (del "%ARCHIVE%" & call :fail "เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ ตรวจสอบ IP เครือข่าย หรือรัน setup-deploy-key.bat ใหม่" & exit /b 1)
+rem บันทึก host key ครั้งแรกอัตโนมัติ
+echo y | "%PLINK%" -ssh -P %DEPLOY_PORT% -pw "%DEPLOY_PASSWORD%" %DEPLOY_USER%@%DEPLOY_HOST% "exit" >nul 2>nul
+"%PLINK%" -batch -ssh -P %DEPLOY_PORT% -pw "%DEPLOY_PASSWORD%" %DEPLOY_USER%@%DEPLOY_HOST% "mkdir -p %DEPLOY_DIR%"
+if errorlevel 1 (del "%ARCHIVE%" & call :fail "เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ ตรวจสอบ IP เครือข่าย และรหัสผ่าน" & exit /b 1)
 call :ok "เชื่อมต่อสำเร็จ"
 
 call :step "4/5" "อัปโหลดไฟล์ขึ้นเซิร์ฟเวอร์"
-"%SCP%" %SSHOPT% -P %DEPLOY_PORT% "%ARCHIVE%" %DEPLOY_USER%@%DEPLOY_HOST%:/tmp/%DEPLOY_APP%-deploy.tar.gz
+"%PSCP%" -batch -P %DEPLOY_PORT% -pw "%DEPLOY_PASSWORD%" "%ARCHIVE%" %DEPLOY_USER%@%DEPLOY_HOST%:/tmp/%DEPLOY_APP%-deploy.tar.gz
 if errorlevel 1 (del "%ARCHIVE%" & call :fail "อัปโหลดแพ็กเกจไม่สำเร็จ" & exit /b 1)
-"%SCP%" %SSHOPT% -P %DEPLOY_PORT% "scripts\deploy-remote.sh" %DEPLOY_USER%@%DEPLOY_HOST%:/tmp/%DEPLOY_APP%-deploy-remote.sh
+"%PSCP%" -batch -P %DEPLOY_PORT% -pw "%DEPLOY_PASSWORD%" "scripts\deploy-remote.sh" %DEPLOY_USER%@%DEPLOY_HOST%:/tmp/%DEPLOY_APP%-deploy-remote.sh
 if errorlevel 1 (del "%ARCHIVE%" & call :fail "อัปโหลดสคริปต์ติดตั้งไม่สำเร็จ" & exit /b 1)
 del "%ARCHIVE%"
 call :ok "อัปโหลดเรียบร้อย"
 
 call :step "5/5" "ติดตั้งและรีสตาร์ทระบบ (pm2) บนเซิร์ฟเวอร์"
-"%SSH%" %SSHOPT% -p %DEPLOY_PORT% %DEPLOY_USER%@%DEPLOY_HOST% "bash -lc 'bash /tmp/%DEPLOY_APP%-deploy-remote.sh %DEPLOY_DIR% %DEPLOY_APP%; rc=$?; rm -f /tmp/%DEPLOY_APP%-deploy-remote.sh; exit $rc'"
+"%PLINK%" -batch -ssh -P %DEPLOY_PORT% -pw "%DEPLOY_PASSWORD%" %DEPLOY_USER%@%DEPLOY_HOST% "bash -lc 'bash /tmp/%DEPLOY_APP%-deploy-remote.sh %DEPLOY_DIR% %DEPLOY_APP%; rc=$?; rm -f /tmp/%DEPLOY_APP%-deploy-remote.sh; exit $rc'"
 if errorlevel 1 (call :fail "ขั้นตอนบนเซิร์ฟเวอร์ไม่สำเร็จ ดูรายละเอียดข้อความด้านบน" & exit /b 1)
 
 echo.
