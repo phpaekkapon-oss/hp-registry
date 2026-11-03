@@ -8,7 +8,7 @@ rem ---- ตั้งค่า (แก้ได้ หรือกำหนด�
 if not defined DEPLOY_HOST set "DEPLOY_HOST=192.168.1.241"
 if not defined DEPLOY_PORT set "DEPLOY_PORT=22"
 if not defined DEPLOY_USER set "DEPLOY_USER=srimuang"
-if not defined DEPLOY_DIR  set "DEPLOY_DIR=/home/srimuang/hp-registry"
+if not defined DEPLOY_DIR  set "DEPLOY_DIR=/var/www/html/hp-registry"
 if not defined DEPLOY_APP  set "DEPLOY_APP=hp-registry"
 rem รหัสผ่านไม่เก็บในไฟล์: ตั้ง DEPLOY_PASSWORD ไว้ก่อนรัน หรือกรอกเมื่อถูกถาม
 
