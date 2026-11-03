@@ -1,0 +1,1236 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Thai script has a small x-height and stacked vowels/tone marks, so the type scale
+   starts higher than Tailwind's Latin defaults: 13px floor for captions, 15px for
+   secondary/UI text, 16px base, 18px+ for headings. Nothing below 13px. */
+@theme {
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.55;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.6;
+}
+
+/* ============================================================================
+   Typography: ONE family (Sarabun), THREE weights (400 / 500 / 600).
+   Hierarchy comes from size and weight, never from switching typefaces.
+   Files are local .woff2 so the app stays fully offline-ready.
+   ============================================================================ */
+
+/* Sarabun 400 */
+@font-face {
+  font-family: 'Sarabun';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Sarabun-Regular.woff2') format('woff2');
+  unicode-range: U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+@font-face {
+  font-family: 'Sarabun';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Sarabun-Latin-Regular.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Sarabun 500 */
+@font-face {
+  font-family: 'Sarabun';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Sarabun-Medium.woff2') format('woff2');
+  unicode-range: U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+@font-face {
+  font-family: 'Sarabun';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Sarabun-Latin-Medium.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Sarabun 600 */
+@font-face {
+  font-family: 'Sarabun';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/Sarabun-SemiBold.woff2') format('woff2');
+  unicode-range: U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+@font-face {
+  font-family: 'Sarabun';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/Sarabun-Latin-SemiBold.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Metric-matched fallback avoids layout shift while the .woff2 loads */
+@font-face {
+  font-family: 'Sarabun Fallback';
+  src: local('Segoe UI'), local('Tahoma'), local('Arial');
+  ascent-override: 98.0%;
+  descent-override: 29.5%;
+  line-gap-override: 0.0%;
+  size-adjust: 100.0%;
+}
+
+@layer base {
+  :root {
+    --font-sarabun: 'Sarabun', 'Sarabun Fallback', 'Segoe UI', Tahoma, sans-serif;
+    --font-prompt: var(--font-sarabun);
+    --font-sans: var(--font-sarabun);
+    --font-mono: var(--font-sarabun);
+
+    /* Enterprise Design Tokens: 16-Color Dynamic Theme Engine */
+    --brand-primary: #1E3A8A;
+    --brand-primary-hover: #1E40AF;
+    /* Soft tint derived from the active theme so every palette stays equally subtle */
+    --brand-soft-bg: color-mix(in srgb, var(--brand-primary) 8%, #fff);
+    /* AA-safe derivatives: filled buttons / text on light use --brand-strong; dark mode text/charts use a lifted accent */
+    --chart-axis: #64748B;
+    --chart-grid: rgba(203, 213, 225, 0.5);
+    --brand-chart: var(--brand-primary);
+    --token-surface-chrome: #FFFFFF;
+    --brand-strong: color-mix(in srgb, var(--brand-primary) 80%, #000);
+    --brand-strong-hover: color-mix(in srgb, var(--brand-primary) 66%, #000);
+    --brand-accent: var(--brand-strong);
+    --token-brand-primary: var(--brand-primary);
+    --token-brand-hover: var(--brand-primary-hover);
+    --token-brand-soft: var(--brand-soft-bg);
+
+    /* Enterprise Design Tokens: Border Radius Scale */
+    --token-radius-sm: 0.5rem;      /* 8px */
+    --token-radius-card: 0.75rem;   /* 12px Default Corporate Radius */
+    --token-radius-lg: 1rem;        /* 16px */
+    --token-radius-modal: 1.5rem;   /* 24px */
+
+    /* Strict 8pt Grid Spacing System Tokens */
+    --space-8pt-1: 0.5rem;          /* 8px */
+    --space-8pt-2: 1rem;            /* 16px */
+    --space-8pt-3: 1.5rem;          /* 24px */
+    --space-8pt-4: 2rem;            /* 32px */
+    --space-8pt-5: 2.5rem;          /* 40px */
+    --space-8pt-6: 3rem;            /* 48px Minimum Ergonomic Touch Target */
+
+    /* Fluid Typography Scale Tokens (Mobile 390px -> Tablet -> Desktop) */
+    --fluid-caption: clamp(0.8125rem, 0.78rem + 0.16vw, 0.875rem);
+    --fluid-body: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+    --fluid-h3: clamp(1.03125rem, 0.98rem + 0.28vw, 1.15rem);
+    --fluid-h2: clamp(1.15rem, 1.06rem + 0.45vw, 1.375rem);
+    --fluid-kpi: clamp(1.5rem, 1.35rem + 0.85vw, 1.95rem);
+
+    /* Enterprise Million-Dollar Secret: Chroma-Shifted Neutrals & Optical Contrast (Light Mode) */
+    --token-surface-canvas: color-mix(in srgb, var(--brand-primary) 2.4%, #F8FAFC);
+    --token-surface-card: color-mix(in srgb, var(--brand-primary) 0.75%, #FFFFFF);
+    --token-surface-elevated: color-mix(in srgb, var(--brand-primary) 3.8%, #F1F5F9);
+    --token-border-subtle: color-mix(in srgb, var(--brand-primary) 9%, #E2E8F0);
+
+    /* Semantic text ramp: one ladder for the whole app so tones stop drifting per view.
+       ink=titles/primary · ink-2=body-strong · ink-3=body · ink-4=secondary · ink-5=muted · ink-6=faint */
+    --text-ink: #0F172A;
+    --text-ink-2: #1E293B;
+    --text-ink-3: #334155;
+    --text-ink-4: #475569;
+    --text-ink-5: #64748B;
+    --text-ink-6: #94A3B8;
+
+    /* Procurement UI (fields, menus, table chrome): one set of surfaces so light and dark stay consistent */
+    --pf-field-bg: #FFFFFF;
+    --pf-field-border: #CBD5E1;
+    --pf-surface: #FFFFFF;
+    --pf-hover: #F1F5F9;
+    --pf-head-bg: #F1F5F9;
+    --pf-bar-bg: rgb(248 250 252 / 0.7);
+    --pf-menu-shadow: 0 12px 32px -8px rgb(15 23 42 / 0.25), 0 2px 6px rgb(15 23 42 / 0.08);
+    --token-border-optical: color-mix(in srgb, var(--brand-primary) 18%, #CBD5E1);
+    --token-shadow-card:
+      0 1px 3px 0 rgba(15, 23, 42, 0.04),
+      0 1px 2px -1px rgba(15, 23, 42, 0.03),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
+  }
+
+  .dark {
+    --chart-axis: #A8B3C5;
+    --brand-accent: color-mix(in srgb, var(--brand-primary) 45%, #fff);
+    --brand-soft-bg: color-mix(in srgb, var(--brand-primary) 20%, #0F172A);
+    /* Enterprise Million-Dollar Secret: Chroma-Shifted Dark Neutrals & Optical Specular Rim */
+    --token-surface-canvas: color-mix(in srgb, var(--brand-primary) 4%, #080C14);
+    --token-surface-chrome: color-mix(in srgb, var(--brand-primary) 5%, #0D1424);
+    --token-surface-card: color-mix(in srgb, var(--brand-primary) 6%, #131C2E);
+    --token-surface-elevated: color-mix(in srgb, var(--brand-primary) 9%, #1C2740);
+    --token-border-subtle: color-mix(in srgb, var(--brand-primary) 12%, #26324A);
+    --token-border-optical: color-mix(in srgb, var(--brand-primary) 24%, #3A4862);
+
+    /* Semantic text ramp, dark: lifted so the same roles stay readable on dark surfaces */
+    --text-ink: #FFFFFF;
+    --text-ink-2: #E2E8F0;
+    --text-ink-3: #CBD5E1;
+    --text-ink-4: #94A3B8;
+    --text-ink-5: #94A3B8;
+    --text-ink-6: #64748B;
+
+    /* Procurement UI, dark: derived from the app's own surfaces (no pure-black fields) */
+    color-scheme: dark; /* native scrollbars, date/number controls and datalist popups follow dark mode */
+    --pf-field-bg: color-mix(in srgb, var(--token-surface-canvas) 35%, var(--token-surface-card));
+    --pf-field-border: color-mix(in srgb, var(--token-border-optical) 90%, transparent);
+    --pf-surface: color-mix(in srgb, var(--token-surface-elevated) 88%, var(--token-surface-card));
+    --pf-hover: color-mix(in srgb, var(--token-surface-elevated) 60%, var(--token-surface-card));
+    --pf-head-bg: color-mix(in srgb, var(--token-surface-elevated) 50%, var(--token-surface-card));
+    --pf-bar-bg: color-mix(in srgb, var(--token-surface-elevated) 28%, var(--token-surface-card));
+    --pf-menu-shadow: 0 16px 40px -8px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.04);
+    /* Shadows vanish on dark UI: depth comes from a lit top edge + tonal steps instead */
+    --token-shadow-card:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.07),
+      0 1px 2px 0 rgba(0, 0, 0, 0.35);
+    --chart-grid: rgba(148, 163, 184, 0.16);
+    --brand-chart: color-mix(in srgb, var(--brand-primary) 70%, #fff);
+  }
+
+  body {
+    font-family: var(--font-sarabun);
+    background-color: var(--token-surface-canvas);
+    color: #0F172A;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-prompt);
+  }
+
+  .dark body {
+    background-color: var(--token-surface-canvas);
+    color: #F8FAFC;
+  }
+}
+
+.font-prompt {
+  font-family: var(--font-prompt);
+}
+
+.font-sarabun {
+  font-family: var(--font-sarabun);
+}
+
+.font-mono-tabular {
+  font-family: var(--font-prompt);
+  font-variant-numeric: tabular-nums;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================================
+   Clean Flat / Modern Corporate & Government UI Utilities
+   Driven by Centralized CSS Design Tokens (--token-*) & Chroma-Shifted Neutrals
+   ============================================================================ */
+
+.gov-card {
+  background-color: var(--token-surface-card);
+  border: 1px solid var(--token-border-subtle);
+  border-radius: var(--token-radius-card);
+  box-shadow: var(--token-shadow-card);
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dark .gov-card {
+  background-color: var(--token-surface-card);
+  border-color: var(--token-border-subtle);
+  box-shadow: var(--token-shadow-card);
+}
+
+.tactile-card {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  transition:
+    transform 150ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tactile-card:hover:not(:disabled) {
+  border-color: var(--token-border-optical);
+}
+
+.tactile-card:active:not(:disabled) {
+  transform: scale3d(0.98, 0.98, 1);
+}
+
+.btn-brand {
+  background-color: var(--brand-strong);
+  color: #FFFFFF;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  transition:
+    transform 130ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.btn-brand:hover:not(:disabled) {
+  background-color: var(--brand-strong-hover);
+}
+
+.btn-brand:active:not(:disabled) {
+  transform: scale3d(0.98, 0.98, 1);
+}
+
+.text-brand {
+  color: var(--brand-accent);
+}
+
+.border-brand {
+  border-color: var(--brand-primary);
+}
+
+.bg-brand-soft {
+  background-color: var(--brand-soft-bg);
+}
+
+/* Soft brand action button (secondary to .btn-brand) */
+.btn-brand-outline {
+  border-color: color-mix(in srgb, var(--brand-primary) 26%, #E2E8F0);
+  background-color: var(--brand-soft-bg);
+  color: var(--brand-strong);
+}
+
+.btn-brand-outline:hover {
+  border-color: color-mix(in srgb, var(--brand-primary) 45%, #E2E8F0);
+  background-color: color-mix(in srgb, var(--brand-primary) 14%, #fff);
+}
+
+.dark .btn-brand-outline {
+  border-color: color-mix(in srgb, var(--brand-primary) 32%, transparent);
+  background-color: color-mix(in srgb, var(--brand-primary) 12%, transparent);
+  color: var(--brand-accent);
+}
+
+.dark .btn-brand-outline:hover {
+  background-color: color-mix(in srgb, var(--brand-primary) 20%, transparent);
+}
+
+.bg-chroma-canvas {
+  background-color: var(--token-surface-canvas);
+}
+
+.bg-chroma-card {
+  background-color: var(--token-surface-card);
+}
+
+.bg-chroma-elevated {
+  background-color: var(--token-surface-elevated);
+}
+
+.border-chroma-subtle {
+  border-color: var(--token-border-subtle);
+}
+
+.border-chroma-optical {
+  border-color: var(--token-border-optical);
+}
+
+/* ============================================================================
+   3D Claymorphism + Glassmorphism Alert Modal Utilities
+   ============================================================================ */
+
+.clay-modal-surface {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.90) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  border-radius: 1.75rem; /* 28px High Border Radius */
+  box-shadow:
+    0 25px 50px -12px rgba(15, 23, 42, 0.28),
+    0 12px 24px -8px rgba(30, 58, 138, 0.14),
+    inset 0 3px 6px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -4px 8px 0 rgba(148, 163, 184, 0.25);
+}
+
+.dark .clay-modal-surface {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.94) 0%, rgba(15, 23, 42, 0.92) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.65),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -4px 8px 0 rgba(0, 0, 0, 0.45);
+}
+
+.clay-icon-orb {
+  background: linear-gradient(135deg, var(--brand-strong) 0%, var(--brand-strong-hover) 100%);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 10px 20px -5px rgba(30, 58, 138, 0.38),
+    inset 0 3px 5px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -3px 6px 0 rgba(15, 23, 42, 0.35);
+}
+
+.clay-btn-primary {
+  background: linear-gradient(135deg, var(--brand-strong) 0%, var(--brand-strong-hover) 100%);
+  color: #FFFFFF;
+  border-radius: 1rem;
+  box-shadow:
+    0 10px 18px -4px rgba(30, 58, 138, 0.35),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -3px 5px 0 rgba(15, 23, 42, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.clay-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.clay-btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.clay-btn-secondary {
+  background: linear-gradient(145deg, #FFFFFF 0%, #F1F5F9 100%);
+  color: #334155;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  border-radius: 1rem;
+  box-shadow:
+    0 6px 14px -3px rgba(15, 23, 42, 0.08),
+    inset 0 2px 3px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -2px 4px 0 rgba(148, 163, 184, 0.22);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dark .clay-btn-secondary {
+  background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+  color: #E2E8F0;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 6px 14px -3px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* iOS Safe Area Inset Utilities (Notch / Dynamic Island / Home Indicator) */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+.px-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Ergonomic Touch Target Utility (>= 48px x 48px) */
+.touch-target {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+/* ============================================================================
+   High-Performance Mobile GPU Hardware Acceleration (120Hz Zero-Jank iOS Physics)
+   ============================================================================ */
+.gpu-accelerated {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.ios-spring-120hz {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  transition-property: transform, opacity, background-color, border-color;
+  transition-duration: 240ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.instant-press {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.instant-press:active:not(:disabled) {
+  transform: scale3d(0.97, 0.97, 1);
+}
+
+
+
+/* ============================================================================
+   Enterprise Polish Layer
+   Unlayered rules intentionally win over Tailwind utilities where noted.
+   ============================================================================ */
+
+/* Thai script breaks with negative tracking (tone marks collide) -> neutralise it */
+.tracking-tight,
+.tracking-tighter,
+.text-fluid-kpi {
+  letter-spacing: 0;
+}
+
+html {
+  color-scheme: light;
+  text-rendering: optimizeLegibility;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  line-height: 1.6; /* Thai needs taller line boxes for stacked vowels/tone marks */
+  min-height: 100vh;
+  min-height: 100dvh; /* mobile browsers shrink the viewport when the URL bar appears */
+}
+
+
+/* Soft atmosphere behind the content area */
+main {
+  background-image:
+    radial-gradient(1200px 380px at 50% -120px, color-mix(in srgb, var(--brand-primary) 7%, transparent), transparent 70%);
+  background-repeat: no-repeat;
+}
+
+/* Cards: calmer border, layered depth, gentle lift on interactive ones */
+.gov-card {
+  border-radius: var(--token-radius-lg);
+}
+button.gov-card:hover:not(:disabled) {
+  box-shadow:
+    0 8px 24px -10px color-mix(in srgb, var(--brand-primary) 28%, transparent),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
+}
+
+/* KPI card accent bar (top edge) */
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--kpi-accent, var(--brand-primary));
+  opacity: 0.9;
+}
+
+/* Sticky translucent app header */
+header.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+}
+
+/* Accessible, consistent keyboard focus.
+   Kept inside @layer base so a component's own `outline-none` (menus, tabs) still wins,
+   and it never changes an element's shape. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--brand-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* Menus show the current item with a soft fill (pointer and keyboard), not an outline */
+[role="menuitem"][data-highlighted],
+[role="option"][data-highlighted] {
+  background-color: color-mix(in srgb, var(--brand-primary) 9%, transparent);
+}
+[role="menuitem"][data-highlighted].text-rose-700 {
+  background-color: color-mix(in srgb, #e11d48 10%, transparent);
+}
+
+/* Slim, quiet scrollbars without arrow buttons.
+   Chrome/Edge/Safari: ::-webkit-scrollbar (the standard scrollbar-* properties would disable it there).
+   Firefox: standard properties. */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--brand-primary) 30%, #94A3B8) transparent;
+  }
+}
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--brand-primary) 28%, #94A3B8);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--brand-primary) 50%, #94A3B8);
+}
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand-primary) 22%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================================
+   Secondary action button (Print, Export, ...). One look for every toolbar.
+   ============================================================================ */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1.125rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--token-border-optical);
+  background: var(--token-surface-card);
+  color: #1e293b;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-secondary svg {
+  color: var(--brand-accent);
+  flex-shrink: 0;
+}
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--brand-accent);
+  background: color-mix(in srgb, var(--brand-primary) 5%, var(--token-surface-card));
+  box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--brand-primary) 55%, transparent);
+  transform: translateY(-1px);
+}
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.dark .btn-secondary {
+  color: #e2e8f0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================================================
+   Print / Save as PDF: a proper A4 report, not a screenshot of the app
+   ============================================================================ */
+.print-only {
+  display: none;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 14mm 12mm 18mm;
+  @bottom-left {
+    content: 'เอกสารใช้ภายในหน่วยงาน · มีข้อมูลส่วนบุคคลตาม PDPA';
+    font-family: 'Sarabun', sans-serif;
+    font-size: 9pt;
+    color: #64748b;
+  }
+  @bottom-right {
+    content: 'หน้า ' counter(page) ' / ' counter(pages);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 9pt;
+    color: #64748b;
+  }
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #0f172a !important;
+    height: auto !important;
+    overflow: visible !important;
+    font-size: 11pt;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* The app shell is a fixed-height flex layout; let it grow over as many pages as needed */
+  #root,
+  #root > div,
+  #root > div > div,
+  main {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: none !important;
+  }
+  .overflow-auto,
+  .overflow-x-auto,
+  .overflow-y-auto,
+  [class*='max-h-'] {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* Hide everything interactive or navigational */
+  aside,
+  header.app-header,
+  footer.app-footer,
+  nav[aria-label*='มือถือ'],
+  [role='dialog'],
+  .print-hide,
+  button:not(.kpi-card),
+  table td:last-child,
+  table th:last-child {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+
+  /* Cards: flat, bordered, never split across pages */
+  .gov-card,
+  .kpi-card {
+    background: #fff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    break-inside: avoid;
+    transform: none !important;
+  }
+  .kpi-card::before {
+    height: 3px;
+  }
+
+  /* Charts are re-rendered at page width by usePrinting(); nothing to force here */
+  .print-table {
+    display: block !important;
+  }
+  /* Sort buttons carry the column titles: keep the words, drop the button look and arrows */
+  .print-table th button {
+    display: inline !important;
+    border: 0 !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font: inherit !important;
+    color: inherit !important;
+  }
+  .print-table th button svg {
+    display: none !important;
+  }
+  /* Fit the table to the page width: wrap text instead of clipping the right-hand columns */
+  .print-table table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: auto;
+    font-size: 9pt;
+  }
+  .print-table th,
+  .print-table td {
+    white-space: normal !important;
+    padding: 6px 8px !important;
+    vertical-align: top;
+  }
+  .print-table .truncate {
+    overflow: visible !important;
+    white-space: normal !important;
+    max-width: none !important;
+  }
+  input,
+  select,
+  textarea,
+  [role='tablist'],
+  div:has(> input[type='search']),
+  label:has(> input) {
+    display: none !important;
+  }
+
+  /* Tables */
+  thead {
+    display: table-header-group;
+  }
+  thead.sticky-head th {
+    position: static !important;
+    background: #f1f5f9 !important;
+  }
+  tr {
+    break-inside: avoid;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* Sticky table header inside a scrolling container */
+thead.sticky-head th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--token-surface-elevated);
+  box-shadow: inset 0 -1px 0 var(--token-border-subtle);
+}
+
+/* ============================================================================
+   Dark mode refinements
+   ============================================================================ */
+.dark aside {
+  background-color: var(--token-surface-chrome);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.dark header.app-header {
+  background-color: color-mix(in srgb, var(--token-surface-chrome) 88%, transparent);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+/* Popovers, menus and dialogs sit above cards */
+.dark [data-radix-popper-content-wrapper] > *,
+.dark [role="dialog"]:not(.clay-modal-surface) {
+  background-color: var(--token-surface-elevated);
+  border-color: var(--token-border-optical);
+}
+
+/* White text on dark glares and looks heavier: soften headings, thin out small bold labels */
+.dark .dark\:text-white:not(.btn-brand):not([class*="bg-"]) {
+  color: #E8EEF7;
+}
+.dark :is(.text-xs, .text-\[11px\], .text-\[10px\]):is(.font-bold, .font-semibold):not(.btn-brand) {
+  font-weight: 500;
+}
+
+/* Quieter semantic colours (less neon on dark) */
+.dark .text-emerald-300,
+.dark .text-emerald-400 { color: #86D5B4; }
+.dark .text-amber-300,
+.dark .text-amber-400 { color: #E8C078; }
+.dark .text-rose-300,
+.dark .text-rose-400 { color: #F2A5AD; }
+
+/* Filled brand buttons keep an edge against dark surfaces (navy/slate themes) */
+.dark .btn-brand {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 0 1px color-mix(in srgb, var(--brand-accent) 38%, transparent);
+}
+.dark .clay-btn-primary {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 0 1px color-mix(in srgb, var(--brand-accent) 38%, transparent);
+}
+
+.dark footer.app-footer {
+  background-color: var(--token-surface-chrome);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* iOS Safari zooms the page when a focused field is under 16px */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Weight scale: 400 body, 500 emphasis, 600 headings/numbers. No 700/800 anywhere. */
+.font-thin,
+.font-extralight,
+.font-light { font-weight: 400; }
+.font-semibold,
+.font-bold,
+.font-extrabold,
+.font-black { font-weight: 600; }
+
+/* Browser defaults make these 700; keep them inside the 400/500/600 scale */
+strong,
+b,
+th {
+  font-weight: 600;
+}
+
+/* Browser autofill paints inputs light blue/yellow; keep them on the app's surface colour */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--autofill-text, #0f172a);
+  box-shadow: 0 0 0 1000px var(--autofill-bg, #f8fafc) inset;
+  caret-color: var(--autofill-text, #0f172a);
+  transition: background-color 9999s ease-out 0s;
+}
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  --autofill-text: #f1f5f9;
+  --autofill-bg: #1c2740;
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise-in { animation: rise-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* ============================================================================
+   Segmented control (tabs / view toggles): one soft track, one raised pill.
+   Active state is read from data-state="active" (Radix) or aria-pressed="true".
+   ============================================================================ */
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--token-surface-elevated);
+  border: 1px solid var(--token-border-subtle);
+  border-radius: 0.875rem;
+}
+.segmented::-webkit-scrollbar {
+  display: none;
+}
+.segmented-item {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: #475569;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+.dark .segmented-item {
+  color: #a8b3c5;
+}
+.segmented-item:hover:not([data-state='active']):not([aria-pressed='true']) {
+  color: #0f172a;
+  background: color-mix(in srgb, var(--brand-primary) 7%, transparent);
+}
+.dark .segmented-item:hover:not([data-state='active']):not([aria-pressed='true']) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+.segmented-item[data-state='active'],
+.segmented-item[aria-pressed='true'] {
+  color: #0f172a;
+  font-weight: 600;
+  background: var(--token-surface-card);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.1),
+    0 0 0 1px color-mix(in srgb, var(--brand-primary) 14%, var(--token-border-subtle));
+}
+.dark .segmented-item[data-state='active'],
+.dark .segmented-item[aria-pressed='true'] {
+  color: #fff;
+  background: color-mix(in srgb, var(--brand-primary) 26%, var(--token-surface-card));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 1px color-mix(in srgb, var(--brand-accent) 28%, transparent);
+}
+
+/* Focus (keyboard only). Controls that sit inside a tight track get an INSET ring so it
+   never collides with the container's own border; text fields get a soft halo instead. */
+.segmented-item:focus-visible,
+[role='tab']:focus-visible,
+[role='radio']:focus-visible,
+th button:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: -2px;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--brand-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-accent) 20%, transparent);
+}
+
+/* Charts are focusable for keyboard users. The browser's default is a hard, square, thick
+   frame around the whole SVG; replace it with a soft rounded ring on the chart wrapper. */
+.recharts-wrapper:focus,
+.recharts-wrapper *:focus,
+.recharts-surface:focus {
+  outline: none;
+}
+.recharts-wrapper:has(:focus-visible) {
+  outline: 2px solid color-mix(in srgb, var(--brand-accent) 60%, transparent);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+/* ============================================================================
+   Login page palette: every surface is derived from the active theme colour so the
+   background, card, fields and button always read as one family (light and dark).
+   ============================================================================ */
+:root {
+  --login-base: color-mix(in srgb, var(--brand-primary) 4%, #f1f5f9);
+  --login-card-bg: #ffffff;
+  --login-card-border: color-mix(in srgb, var(--brand-primary) 12%, #e2e8f0);
+  --login-field-bg: #f8fafc;
+  --login-field-border: #cbd5e1;
+}
+.dark {
+  --login-base: color-mix(in srgb, var(--brand-primary) 13%, #101a2d);
+  --login-card-bg: color-mix(in srgb, var(--brand-primary) 9%, #1a2640);
+  --login-card-border: color-mix(in srgb, var(--brand-accent) 22%, #2c3a58);
+  --login-field-bg: color-mix(in srgb, var(--brand-primary) 7%, #121c33);
+  --login-field-border: color-mix(in srgb, var(--brand-accent) 22%, #3a4966);
+  --autofill-bg: var(--login-field-bg);
+}
+
+.login-surface {
+  background-color: var(--login-base);
+  background-image:
+    radial-gradient(1000px 560px at 82% -12%, color-mix(in srgb, var(--brand-primary) 22%, transparent), transparent 70%),
+    radial-gradient(760px 520px at -5% 108%, color-mix(in srgb, var(--brand-primary) 15%, transparent), transparent 70%);
+}
+.gov-card.login-card {
+  background: var(--login-card-bg);
+  border-color: var(--login-card-border);
+}
+.dark .gov-card.login-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 28px 70px -28px color-mix(in srgb, var(--brand-primary) 55%, #000);
+}
+
+/* Thai stacks vowels and tone marks above and below the line (e.g. "ผู้", "ตั้", "สิทธิ์").
+   \`truncate\` / \`line-clamp\` hide anything outside the line box, and the tight leading used in
+   many components (leading-snug / leading-tight) leaves no room, so the marks get cut off.
+   Give every clipped text box a Thai-safe line height. */
+.truncate,
+[class*='line-clamp-'] {
+  line-height: 1.65;
+}
+
+/* ============================================================================
+   Procurement UI building blocks (fields, menus, outline buttons)
+   All colors come from the --pf-* tokens above so light and dark stay in step.
+   ============================================================================ */
+.pf-field {
+  background-color: var(--pf-field-bg);
+  border: 1px solid var(--pf-field-border);
+  color: #0F172A;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+.dark .pf-field { color: #F1F5F9; }
+.pf-field::placeholder { color: #64748B; }
+.dark .pf-field::placeholder { color: #8B98AE; }
+.pf-field:hover:not(:disabled):not([aria-invalid='true']) {
+  border-color: color-mix(in srgb, var(--pf-field-border) 55%, var(--brand-strong));
+}
+.pf-field:focus-visible,
+.pf-field[data-state='open'] {
+  outline: none;
+  border-color: var(--brand-strong);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-strong) 24%, transparent);
+}
+.pf-field:disabled { opacity: 0.65; cursor: not-allowed; }
+.pf-field[aria-invalid='true'] { border-color: #E11D48; }
+
+.pf-btn {
+  background-color: var(--pf-field-bg);
+  border: 1px solid var(--pf-field-border);
+  color: #1E293B;
+  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+.dark .pf-btn { color: #E2E8F0; }
+.pf-btn:hover:not(:disabled) { background-color: var(--pf-hover); }
+.pf-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-strong) 28%, transparent); }
+.pf-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.pf-menu {
+  background-color: var(--pf-surface);
+  border: 1px solid var(--pf-field-border);
+  box-shadow: var(--pf-menu-shadow);
+  color: #0F172A;
+}
+.dark .pf-menu { color: #F1F5F9; }
+.pf-item[data-highlighted] { background-color: color-mix(in srgb, var(--brand-strong) 11%, transparent); }
+.dark .pf-item[data-highlighted] { background-color: color-mix(in srgb, var(--brand-accent) 20%, transparent); }
+.pf-item[data-state='checked'] { font-weight: 600; }
+
+/* Clickable summary cards (.gov-card is unlayered, so its border/shadow must be overridden here, not with utilities) */
+.gov-card[aria-pressed]:hover { border-color: var(--brand-strong); }
+.dark .gov-card[aria-pressed]:hover { border-color: var(--brand-accent); }
+.gov-card[aria-pressed='true'] {
+  background-color: var(--brand-soft-bg);
+  border-color: var(--brand-strong);
+  box-shadow: 0 0 0 2px var(--brand-strong);
+}
+.dark .gov-card[aria-pressed='true'] {
+  border-color: var(--brand-accent);
+  box-shadow: 0 0 0 2px var(--brand-accent);
+}
+
+/* Live updates: a row or number that just changed lights up and fades, so nobody has to hunt for what moved */
+@keyframes live-row-flash {
+  0%   { background-color: color-mix(in srgb, var(--brand-accent) 38%, transparent); }
+  100% { background-color: transparent; }
+}
+@keyframes live-value-flash {
+  0%   { transform: scale(1.14); background-color: color-mix(in srgb, var(--brand-accent) 45%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-accent) 45%, transparent); }
+  40%  { transform: scale(1); }
+  100% { transform: scale(1); background-color: transparent; box-shadow: 0 0 0 4px transparent; }
+}
+/* A new row slides in from slightly above while it lights up */
+@keyframes live-row-in {
+  0%   { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.row-flash > td { animation: live-row-flash 3s ease-out; }
+.row-new > td { animation: live-row-flash 3s ease-out, live-row-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.value-flash { display: inline-block; animation: live-value-flash 1.8s ease-out; border-radius: 0.375rem; }
+@media (prefers-reduced-motion: reduce) {
+  .row-flash > td, .row-new > td, .value-flash { animation: none; }
+}
+
+/* ---- Left menu looks (see services/sidebarStyle.ts) ----
+   All five styles share ONE markup and ONE hierarchy: each style only re-declares
+   the --sb-* tokens below, so the menu reads identically everywhere (same active
+   contrast, same muted levels, same hairlines) on any theme colour and dark mode. */
+:root {
+  --sb-bg: #0f1623;
+  /* Text ramp: one consistent ladder everywhere — fg (active/titles) > muted (idle items) > faint (captions) */
+  --sb-fg: rgba(255, 255, 255, 0.98);
+  --sb-muted: rgba(255, 255, 255, 0.78);
+  --sb-faint: rgba(255, 255, 255, 0.55);
+  --sb-hover: rgba(255, 255, 255, 0.07);
+  --sb-active-bg: rgba(255, 255, 255, 0.16);
+  --sb-active-fg: #ffffff;
+  --sb-divider: rgba(255, 255, 255, 0.08);
+  --sb-card-bg: rgba(255, 255, 255, 0.05);
+  --sb-card-border: rgba(255, 255, 255, 0.09);
+  --sb-badge-bg: var(--sb-active-bg);
+  --sb-badge-fg: var(--sb-active-fg);
+  --sb-ok: #34d399;   /* emerald-400: readable on dark/coloured bars */
+  --sb-warn: #fbbf24; /* amber-400 */
+}
+
+aside.app-sidebar {
+  background: var(--sb-bg);
+  color: var(--sb-fg);
+  border-right: 1px solid var(--sb-divider);
+}
+
+/* Tint / gradient: pale theme-washed bars need dark ink in light mode */
+:root[data-sidebar-style="tint"] aside.app-sidebar { --sb-bg: color-mix(in srgb, var(--brand-primary) 9%, #ffffff); }
+:root[data-sidebar-style="gradient"] aside.app-sidebar { --sb-bg: linear-gradient(180deg, color-mix(in srgb, var(--brand-primary) 22%, #ffffff) 0%, #ffffff 70%); }
+:root:not(.dark)[data-sidebar-style="tint"] aside.app-sidebar,
+:root:not(.dark)[data-sidebar-style="gradient"] aside.app-sidebar {
+  --sb-fg: #0f172a;
+  --sb-muted: rgba(15, 23, 42, 0.75);
+  --sb-faint: rgba(15, 23, 42, 0.52);
+  --sb-hover: color-mix(in srgb, var(--brand-primary) 8%, transparent);
+  --sb-active-bg: color-mix(in srgb, var(--brand-primary) 15%, #ffffff);
+  --sb-active-fg: var(--brand-strong);
+  --sb-divider: color-mix(in srgb, var(--brand-primary) 15%, #e2e8f0);
+  --sb-card-bg: rgba(255, 255, 255, 0.65);
+  --sb-card-border: color-mix(in srgb, var(--brand-primary) 15%, #e2e8f0);
+  --sb-ok: #047857;   /* emerald-700: readable on pale bars */
+  --sb-warn: #b45309; /* amber-700 */
+}
+:root.dark[data-sidebar-style="tint"] aside.app-sidebar { --sb-bg: color-mix(in srgb, var(--brand-primary) 20%, #0f172a); }
+:root.dark[data-sidebar-style="gradient"] aside.app-sidebar { --sb-bg: linear-gradient(180deg, color-mix(in srgb, var(--brand-primary) 42%, #0f172a) 0%, #0f172a 75%); }
+
+/* Solid: full brand bar — stronger translucent whites for interaction layers, dark inset cards */
+:root[data-sidebar-style="solid"] aside.app-sidebar {
+  --sb-bg: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-primary) 80%, #0b1220) 0%,
+    color-mix(in srgb, var(--brand-primary) 58%, #0b1220) 45%,
+    color-mix(in srgb, var(--brand-primary) 30%, #0b1220) 100%
+  );
+  --sb-hover: rgba(255, 255, 255, 0.12);
+  --sb-active-bg: rgba(255, 255, 255, 0.24);
+  --sb-divider: rgba(255, 255, 255, 0.18);
+  --sb-card-bg: rgba(0, 0, 0, 0.12);
+  --sb-card-border: rgba(255, 255, 255, 0.18);
+  --sb-badge-bg: rgba(255, 255, 255, 0.92);
+  --sb-badge-fg: color-mix(in srgb, var(--brand-primary) 70%, #000000);
+  border-right-color: transparent;
+}
+
+/* Premium: near-black bar, the open page is a theme-tinted pill */
+:root[data-sidebar-style="premium"] aside.app-sidebar {
+  --sb-bg: var(--token-surface-chrome);
+  --sb-active-bg: linear-gradient(90deg, color-mix(in srgb, var(--brand-primary) 55%, transparent), color-mix(in srgb, var(--brand-primary) 14%, transparent));
+  border-right-color: var(--token-border-subtle);
+}
+
+/* Menu parts, all driven by the tokens above */
+aside.app-sidebar .sb-nav-btn { color: var(--sb-muted); transition: background-color 0.15s ease, color 0.15s ease; }
+aside.app-sidebar .sb-nav-btn:hover { color: var(--sb-fg); background-color: var(--sb-hover); }
+aside.app-sidebar .sb-nav-btn.is-active { color: var(--sb-active-fg); background-color: var(--sb-active-bg); }
+aside.app-sidebar .sb-title { font-weight: 500; }
+aside.app-sidebar .sb-nav-btn.is-active .sb-title { font-weight: 700; }
+aside.app-sidebar .sb-section-label { color: var(--sb-faint); }
+aside.app-sidebar .sb-section-rule { background-color: var(--sb-divider); }
+aside.app-sidebar .sb-tree { border-left: 1px solid var(--sb-divider); }
+aside.app-sidebar .sb-sublink { color: var(--sb-muted); transition: background-color 0.15s ease, color 0.15s ease; }
+aside.app-sidebar .sb-sublink:hover { color: var(--sb-fg); background-color: var(--sb-hover); }
+aside.app-sidebar .sb-hairline { border-color: var(--sb-divider); }
+aside.app-sidebar .sb-card { background-color: var(--sb-card-bg); border-color: var(--sb-card-border); }
+aside.app-sidebar .sb-hoverable:hover { background-color: var(--sb-hover); }
+aside.app-sidebar .sb-brand-sub { color: var(--sb-faint); }
+aside.app-sidebar .sb-badge { background-color: var(--sb-badge-bg); color: var(--sb-badge-fg); }
+aside.app-sidebar .sb-quiet { color: var(--sb-muted); }
+aside.app-sidebar .sb-ok { color: var(--sb-ok); }
+aside.app-sidebar .sb-warn { color: var(--sb-warn); }
+aside.app-sidebar .sb-quiet-btn { color: var(--sb-muted); transition: background-color 0.15s ease, color 0.15s ease; }
+aside.app-sidebar .sb-quiet-btn:hover { color: var(--sb-fg); background-color: var(--sb-hover); }
+aside.app-sidebar .sb-logout-btn { color: var(--sb-muted); }
+aside.app-sidebar .sb-logout-btn:hover { color: #fb7185; background-color: rgba(244, 63, 94, 0.1); }

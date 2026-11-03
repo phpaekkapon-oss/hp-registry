@@ -1,0 +1,31 @@
+export type ReleaseKind = 'major' | 'minor' | 'patch';
+
+export interface ReleaseNote {
+  version: string;
+  /** ISO date (YYYY-MM-DD) */
+  date: string;
+  title: string;
+  kind: ReleaseKind;
+  highlights: string[];
+}
+
+/**
+ * Newest first. release.bat refuses to publish a version that has no entry here,
+ * so every version tagged on GitHub is also described in the app.
+ */
+export const CHANGELOG: ReleaseNote[] = [
+  {
+    version: '1.0.0',
+    date: '2026-11-03',
+    title: 'เปิดใช้งานระบบงานพัสดุ',
+    kind: 'major',
+    highlights: [
+      'ทะเบียนหนังสือรับ (ต้นเรื่อง) ใบสั่งซื้อ/สั่งจ้าง (PO) ทะเบียนสัญญา และหลักประกันสัญญา',
+      'ติดตามความก้าวหน้าการจัดหา 17 ขั้นตอน พร้อมรายงานสรุป (แบบ สขร. 1) และส่งออก Excel',
+      'ซ่อนข้อมูลส่วนบุคคลตามสิทธิ์ผู้ใช้ (PDPA) และบันทึกประวัติการแก้ไข',
+      'เลือกสีธีมและสไตล์แถบเมนูด้านข้างได้ รองรับโหมดมืด',
+    ],
+  },
+];
+
+export const latestRelease = (): ReleaseNote => CHANGELOG[0];

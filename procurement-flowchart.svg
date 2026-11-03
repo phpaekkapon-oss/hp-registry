@@ -1,0 +1,264 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1350" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&amp;family=Prompt:wght@600;700&amp;display=swap');
+      text { font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .title { font-family: 'Prompt', 'Sarabun', sans-serif; font-weight: 700; fill: #0f172a; }
+      .subtitle { fill: #475569; font-size: 15px; }
+      .phase-title { font-family: 'Prompt', 'Sarabun', sans-serif; font-weight: 600; font-size: 16px; }
+      .box-title { font-family: 'Prompt', 'Sarabun', sans-serif; font-weight: 600; font-size: 15px; }
+      .box-desc { font-size: 13px; fill: #475569; }
+      .tag { font-size: 11px; font-weight: 600; }
+    </style>
+    
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+    <filter id="card-shadow" x="-3%" y="-3%" width="106%" height="108%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.04"/>
+    </filter>
+
+    <!-- Gradients -->
+    <linearGradient id="header-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+
+    <!-- Markers -->
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-teal" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#0d9488"/>
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#4f46e5"/>
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#d97706"/>
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1200" height="1350" fill="#f8fafc"/>
+
+  <!-- Top Title Header Banner -->
+  <g transform="translate(60, 40)">
+    <rect width="1080" height="100" rx="16" fill="#ffffff" filter="url(#shadow)" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="0" y="0" width="8" height="100" rx="4" fill="url(#header-grad)"/>
+    <text x="36" y="42" class="title" font-size="24">ผังวงจรชีวิตการทำงานระบบพัสดุและสัญญา (Procurement Lifecycle Flowchart)</text>
+    <text x="36" y="74" class="subtitle">กองโรคติดต่อทั่วไป กรมควบคุมโรค • อ้างอิง พ.ร.บ. การจัดซื้อจัดจ้างฯ พ.ศ. 2560 และ พ.ร.บ. ข้อมูลข่าวสารฯ พ.ศ. 2540 (สขร. 1)</text>
+    <rect x="910" y="32" width="134" height="34" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="977" y="54" text-anchor="middle" fill="#1d4ed8" font-size="13" font-weight="700">คู่มือปฏิบัติงาน</text>
+  </g>
+
+  <!-- ==================== PHASE 1: INCOMING ==================== -->
+  <g transform="translate(60, 170)">
+    <!-- Phase 1 Container -->
+    <rect width="1080" height="200" rx="16" fill="#f0fdfa" stroke="#99f6e4" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="24" y="-14" width="240" height="28" rx="6" fill="#0d9488"/>
+    <text x="144" y="5" fill="#ffffff" text-anchor="middle" class="phase-title" font-size="13">ระยะที่ 1: รับเอกสารต้นเรื่อง</text>
+
+    <!-- Card 1.1 -->
+    <g transform="translate(40, 35)">
+      <rect width="300" height="130" rx="12" fill="#ffffff" stroke="#ccfbf1" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="32" cy="34" r="16" fill="#ccfbf1"/>
+      <text x="32" y="39" text-anchor="middle" font-size="16">📥</text>
+      <text x="58" y="34" class="box-title" fill="#0f766e">1. สารบรรณพัสดุรับเรื่อง</text>
+      <text x="58" y="50" class="tag" fill="#0d9488">ทะเบียนหนังสือรับ (Incoming)</text>
+      <text x="20" y="80" class="box-desc">• บันทึกเลขทะเบียนรับ, วันที่, จาก, เรื่อง</text>
+      <text x="20" y="102" class="box-desc">• บันทึกราคาประมาณการ หรือวงเงิน</text>
+      <text x="20" y="124" class="box-desc">• ระบุประเภทหมวดหมู่งานพัสดุ</text>
+    </g>
+
+    <!-- Arrow 1.1 -> 1.2 -->
+    <path d="M 340 100 L 400 100" stroke="#0d9488" stroke-width="2.5" fill="none" marker-end="url(#arrow-teal)"/>
+
+    <!-- Card 1.2 -->
+    <g transform="translate(410, 35)">
+      <rect width="300" height="130" rx="12" fill="#ffffff" stroke="#ccfbf1" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="32" cy="34" r="16" fill="#ccfbf1"/>
+      <text x="32" y="39" text-anchor="middle" font-size="16">👤</text>
+      <text x="58" y="34" class="box-title" fill="#0f766e">2. มอบหมายผู้รับผิดชอบ</text>
+      <text x="58" y="50" class="tag" fill="#0d9488">มอบหมายงาน / แหล่งงบ</text>
+      <text x="20" y="80" class="box-desc">• เลือกเจ้าหน้าที่ผู้รับผิดชอบ (Inline Select)</text>
+      <text x="20" y="102" class="box-desc">• กำหนดแหล่งเงิน: เงินบำรุง / พ.ร.บ. งบฯ</text>
+      <text x="20" y="124" class="box-desc">• ตรวจสอบความถูกต้องและงบประมาณ</text>
+    </g>
+
+    <!-- Arrow 1.2 -> 1.3 -->
+    <path d="M 710 100 L 770 100" stroke="#0d9488" stroke-width="2.5" fill="none" marker-end="url(#arrow-teal)"/>
+
+    <!-- Card 1.3 -->
+    <g transform="translate(780, 35)">
+      <rect width="260" height="130" rx="12" fill="#ffffff" stroke="#ccfbf1" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="32" cy="34" r="16" fill="#ccfbf1"/>
+      <text x="32" y="39" text-anchor="middle" font-size="16">📑</text>
+      <text x="58" y="34" class="box-title" fill="#0f766e">3. ขอความเห็นชอบ</text>
+      <text x="58" y="50" class="tag" fill="#0d9488">รายงานขอซื้อ/ขอจ้าง</text>
+      <text x="20" y="80" class="box-desc">• จัดทำรายงานขอซื้อขอจ้าง</text>
+      <text x="20" y="102" class="box-desc">• เสนอหัวหน้าเจ้าหน้าที่ / ผอ.</text>
+      <text x="20" y="124" class="box-desc">• อนุมัติการจัดหาและกำหนดวิธี</text>
+    </g>
+  </g>
+
+  <!-- Connector Phase 1 to Phase 2 (Branching) -->
+  <path d="M 600 370 L 600 410" stroke="#2563eb" stroke-width="2.5" fill="none"/>
+  <path d="M 600 410 L 320 410 L 320 440" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arrow-blue)"/>
+  <path d="M 600 410 L 880 410 L 880 440" stroke="#4f46e5" stroke-width="2.5" fill="none" marker-end="url(#arrow-indigo)"/>
+
+  <!-- Decision diamond badge -->
+  <g transform="translate(515, 395)">
+    <rect width="170" height="30" rx="8" fill="#1e293b"/>
+    <text x="85" y="20" fill="#ffffff" text-anchor="middle" font-size="12" font-weight="700">พิจารณาวงเงินและรูปแบบ</text>
+  </g>
+
+  <!-- ==================== PHASE 2: PROCUREMENT & CONTRACTS ==================== -->
+  <g transform="translate(60, 440)">
+    <!-- Phase 2 Container -->
+    <rect width="1080" height="260" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="24" y="-14" width="280" height="28" rx="6" fill="#2563eb"/>
+    <text x="164" y="5" fill="#ffffff" text-anchor="middle" class="phase-title" font-size="13">ระยะที่ 2: จัดทำใบสั่งซื้อ / สัญญา</text>
+
+    <!-- Branch A: Purchase Orders -->
+    <g transform="translate(30, 30)">
+      <rect width="480" height="200" rx="14" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <rect x="18" y="16" width="130" height="24" rx="6" fill="#0284c7"/>
+      <text x="83" y="32" fill="#ffffff" text-anchor="middle" font-size="12" font-weight="700">ใบสั่งซื้อ/สั่งจ้าง (PO)</text>
+      <text x="160" y="32" fill="#0369a1" font-size="12" font-weight="600">วงเงินไม่เกิน 500,000 บาท หรือจัดหาทั่วไป</text>
+
+      <g transform="translate(20, 56)">
+        <rect width="440" height="124" rx="8" fill="#ffffff" stroke="#e0f2fe"/>
+        <text x="16" y="28" class="box-desc" font-weight="600" fill="#0f172a">• ดึงต้นเรื่องจากปุ่ม [🛒 สร้างใบสั่งซื้อ] ในหน้าหนังสือรับ</text>
+        <text x="16" y="52" class="box-desc">• ออกเลขที่ใบสั่งซื้อ/จ้างอัตโนมัติ (เช่น 1/2570)</text>
+        <text x="16" y="76" class="box-desc">• บันทึกผู้ขาย, เลขผู้เสียภาษี 13 หลัก, ราคากลาง, ราคาที่ตกลง</text>
+        <text x="16" y="100" class="box-desc">• เลือกสถานะ: อยู่ระหว่างจัดซื้อจัดจ้าง / ส่งมอบ</text>
+      </g>
+    </g>
+
+    <!-- Branch B: Contracts -->
+    <g transform="translate(570, 30)">
+      <rect width="480" height="200" rx="14" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <rect x="18" y="16" width="130" height="24" rx="6" fill="#7c3aed"/>
+      <text x="83" y="32" fill="#ffffff" text-anchor="middle" font-size="12" font-weight="700">ทะเบียนสัญญา (Contract)</text>
+      <text x="160" y="32" fill="#6d28d9" font-size="12" font-weight="600">จ้างเหมาบริการ / งานโครงการ / ระยะยาว</text>
+
+      <g transform="translate(20, 56)">
+        <rect width="440" height="124" rx="8" fill="#ffffff" stroke="#f3e8ff"/>
+        <text x="16" y="28" class="box-desc" font-weight="600" fill="#0f172a">• ดึงต้นเรื่องจากปุ่ม [📑 สร้างสัญญา] หรือกด [+ ผูกหนังสือรับ]</text>
+        <text x="16" y="52" class="box-desc">• ออกเลขที่สัญญา (เช่น 1/2570), วันที่ลงนาม, ระยะเวลาส่งมอบ</text>
+        <text x="16" y="76" class="box-desc">• เชื่อมโยงหลักประกันสัญญา (5% ของวงเงินสัญญา)</text>
+        <text x="16" y="100" class="box-desc">• ติดตามงวดงานและบันทึกใบแจ้งหนี้แต่ละงวด</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Connector Phase 2 to Sub: Guarantee -->
+  <g transform="translate(850, 680)">
+    <!-- Guarantee Sub-card -->
+    <path d="M 0 20 L 0 50" stroke="#d97706" stroke-width="2.5" fill="none" marker-end="url(#arrow-amber)"/>
+  </g>
+
+  <!-- ==================== SUB-PHASE: GUARANTEE ==================== -->
+  <g transform="translate(580, 740)">
+    <rect width="500" height="90" rx="12" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <circle cx="30" cy="30" r="14" fill="#fef3c7"/>
+    <text x="30" y="35" text-anchor="middle" font-size="14">🛡️</text>
+    <text x="54" y="34" class="box-title" fill="#b45309">ทะเบียนหลักประกันสัญญา (Guarantees)</text>
+    <text x="20" y="62" class="box-desc">• รับหลักประกันสัญญา (เงินสด/หนังสือค้ำประกันธนาคาร/เช็ค)</text>
+    <text x="20" y="80" class="box-desc">• แจ้งเตือนสถานะ: ยังไม่คืน / เลยกำหนดคืน / คืนแล้ว (มีระบบนับวันอัตโนมัติ)</text>
+  </g>
+
+  <!-- Connector Phase 2 to Phase 3 -->
+  <path d="M 300 700 L 300 870" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arrow-emerald)"/>
+  <path d="M 750 830 L 750 870" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arrow-emerald)"/>
+
+  <!-- ==================== PHASE 3: INSPECTION & DISBURSEMENT ==================== -->
+  <g transform="translate(60, 870)">
+    <!-- Phase 3 Container -->
+    <rect width="1080" height="190" rx="16" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="24" y="-14" width="280" height="28" rx="6" fill="#059669"/>
+    <text x="164" y="5" fill="#ffffff" text-anchor="middle" class="phase-title" font-size="13">ระยะที่ 3: ตรวจรับพัสดุและส่งเบิกจ่าย</text>
+
+    <!-- Step 3.1 -->
+    <g transform="translate(40, 30)">
+      <rect width="300" height="125" rx="12" fill="#ffffff" stroke="#dcfce7" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="32" cy="32" r="16" fill="#dcfce7"/>
+      <text x="32" y="37" text-anchor="middle" font-size="16">📦</text>
+      <text x="58" y="32" class="box-title" fill="#15803d">1. ส่งมอบและวางบิล</text>
+      <text x="58" y="48" class="tag" fill="#059669">ใบแจ้งหนี้ / ใบส่งของ</text>
+      <text x="20" y="76" class="box-desc">• รับใบส่งของ/ใบแจ้งหนี้ในหนังสือรับ</text>
+      <text x="20" y="96" class="box-desc">• ผูกเป็น link_role = 'invoice' กับใบสั่ง/สัญญา</text>
+      <text x="20" y="116" class="box-desc">• ตรวจสอบยอดรวมที่เรียกเก็บ</text>
+    </g>
+
+    <!-- Arrow 3.1 -> 3.2 -->
+    <path d="M 340 92 L 400 92" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arrow-emerald)"/>
+
+    <!-- Step 3.2 -->
+    <g transform="translate(410, 30)">
+      <rect width="300" height="125" rx="12" fill="#ffffff" stroke="#dcfce7" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="32" cy="32" r="16" fill="#dcfce7"/>
+      <text x="32" y="37" text-anchor="middle" font-size="16">✅</text>
+      <text x="58" y="32" class="box-title" fill="#15803d">2. คณะกรรมการตรวจรับ</text>
+      <text x="58" y="48" class="tag" fill="#059669">รายงานผลการตรวจรับ</text>
+      <text x="20" y="76" class="box-desc">• คณะกรรมการตรวจรับพัสดุถูกต้อง</text>
+      <text x="20" y="96" class="box-desc">• บันทึกวันที่ตรวจรับ (inspected_date)</text>
+      <text x="20" y="116" class="box-desc">• เลขรายงานตรวจรับ สธ0410.1.4/...</text>
+    </g>
+
+    <!-- Arrow 3.2 -> 3.3 -->
+    <path d="M 710 92 L 770 92" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arrow-emerald)"/>
+
+    <!-- Step 3.3 -->
+    <g transform="translate(780, 30)">
+      <rect width="260" height="125" rx="12" fill="#ffffff" stroke="#dcfce7" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="32" cy="32" r="16" fill="#dcfce7"/>
+      <text x="32" y="37" text-anchor="middle" font-size="16">💸</text>
+      <text x="58" y="32" class="box-title" fill="#15803d">3. ส่งเบิกเงิน</text>
+      <text x="58" y="48" class="tag" fill="#059669">ส่งการเงิน / เบิกจ่าย</text>
+      <text x="20" y="76" class="box-desc">• ส่งหลักฐานเบิกจ่ายไปยังงานการเงิน</text>
+      <text x="20" y="96" class="box-desc">• บันทึกวันที่ส่งเบิก (disbursed_date)</text>
+      <text x="20" y="116" class="box-desc">• อัปเดตสถานะเป็น "ส่งเบิกแล้ว"</text>
+    </g>
+  </g>
+
+  <!-- Connector Phase 3 to Phase 4 -->
+  <path d="M 600 1060 L 600 1100" stroke="#4f46e5" stroke-width="2.5" fill="none" marker-end="url(#arrow-indigo)"/>
+
+  <!-- ==================== PHASE 4: REPORTING & DISCLOSURE ==================== -->
+  <g transform="translate(60, 1100)">
+    <!-- Phase 4 Container -->
+    <rect width="1080" height="190" rx="16" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="24" y="-14" width="360" height="28" rx="6" fill="#4f46e5"/>
+    <text x="204" y="5" fill="#ffffff" text-anchor="middle" class="phase-title" font-size="13">ระยะที่ 4: สรุปผล รายงาน สขร. 1 และคืนหลักประกัน</text>
+
+    <!-- Report Card 4.1 -->
+    <g transform="translate(40, 30)">
+      <rect width="480" height="125" rx="12" fill="#ffffff" stroke="#e0e7ff" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="32" cy="32" r="16" fill="#e0e7ff"/>
+      <text x="32" y="37" text-anchor="middle" font-size="16">📊</text>
+      <text x="58" y="32" class="box-title" fill="#3730a3">แบบสรุปผลการจัดซื้อจัดจ้าง (แบบ สขร. 1)</text>
+      <text x="58" y="48" class="tag" fill="#4f46e5">พรบ. ข้อมูลข่าวสารของราชการ พ.ศ. 2540</text>
+      <text x="20" y="76" class="box-desc">• สร้างแบบรายงานสรุป 9 คอลัมน์มาตรฐานอัตโนมัติประจำเดือน</text>
+      <text x="20" y="96" class="box-desc">• กรองตามเดือน/ปี และส่งออกไฟล์ Excel หรือสั่งพิมพ์ PDF แนวนอน</text>
+      <text x="20" y="116" class="box-desc">• มีบล็อกลงนามผู้รายงาน และหัวหน้าเจ้าหน้าที่พัสดุ</text>
+    </g>
+
+    <!-- Report Card 4.2 -->
+    <g transform="translate(560, 30)">
+      <rect width="480" height="125" rx="12" fill="#ffffff" stroke="#e0e7ff" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="32" cy="32" r="16" fill="#e0e7ff"/>
+      <text x="32" y="37" text-anchor="middle" font-size="16">🤝</text>
+      <text x="58" y="32" class="box-title" fill="#3730a3">บริหารสัญญาและคืนหลักประกัน</text>
+      <text x="58" y="48" class="tag" fill="#4f46e5">สิ้นสุดระยะเวลาผูกพัน</text>
+      <text x="20" y="76" class="box-desc">• ตรวจสอบระยะเวลาค้ำประกัน (เช่น ประกันผลงาน 1-2 ปี)</text>
+      <text x="20" y="96" class="box-desc">• เมื่อครบกำหนดและไม่มีข้อชำรุดบกพร่อง คืนหลักประกันแก่คู่สัญญา</text>
+      <text x="20" y="116" class="box-desc">• ปิดสถานะสัญญาในระบบ "เสร็จสิ้นสมบูรณ์"</text>
+    </g>
+  </g>
+</svg>

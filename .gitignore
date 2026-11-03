@@ -1,0 +1,16 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+backups/
+.dev-ports.json
+
+# ข้อมูลทะเบียนจริง / ไฟล์ชั่วคราว — ไม่ส่งขึ้น GitHub
+*.xlsx
+Untitled
+awesome-cursorrules/
