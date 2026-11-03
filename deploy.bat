@@ -8,7 +8,7 @@ rem ---- ตั้งค่า (แก้ได้ หรือกำหนด�
 if not defined DEPLOY_HOST set "DEPLOY_HOST=192.168.1.241"
 if not defined DEPLOY_PORT set "DEPLOY_PORT=22"
 if not defined DEPLOY_USER set "DEPLOY_USER=srimuang"
-if not defined DEPLOY_DIR  set "DEPLOY_DIR=/var/www/html/hp-registry"
+if not defined DEPLOY_DIR  set "DEPLOY_DIR=/home/srimuang/hp-registry"
 if not defined DEPLOY_APP  set "DEPLOY_APP=hp-registry"
 rem รหัสผ่านไม่เก็บในไฟล์: ตั้ง DEPLOY_PASSWORD ไว้ก่อนรัน หรือกรอกเมื่อถูกถาม
 
@@ -39,7 +39,8 @@ if not exist "%TAR%" (call :fail "ไม่พบ tar.exe ของ Windows" & e
 if not exist "%PLINK%" (call :fail "ไม่พบโปรแกรม PuTTY (plink/pscp) ที่ C:\Program Files\PuTTY" & exit /b 1)
 
 if not defined DEPLOY_PASSWORD (
-  for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "$s = Read-Host 'กรอกรหัสผ่าน SSH ของผู้ใช้ %DEPLOY_USER%' -AsSecureString; [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($s))"`) do set "DEPLOY_PASSWORD=%%P"
+  echo %C_WARN%   ก่อนพิมพ์รหัสผ่าน: สลับแป้นพิมพ์เป็นภาษาอังกฤษ ^(Win + Space^) หรือวางด้วยคลิกขวา%C_RST%
+  for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "$s = Read-Host 'กรอกรหัสผ่าน SSH ของผู้ใช้ %DEPLOY_USER%' -AsSecureString; $p = [Runtime.InteropServices.Marshal]::PtrToStringBSTR([Runtime.InteropServices.Marshal]::SecureStringToBSTR($s)); [Console]::Error.WriteLine('รับรหัสผ่านแล้ว ' + $p.Length + ' ตัวอักษร'); $p"`) do set "DEPLOY_PASSWORD=%%P"
 )
 if not defined DEPLOY_PASSWORD (call :fail "ไม่ได้กรอกรหัสผ่าน" & exit /b 1)
 
