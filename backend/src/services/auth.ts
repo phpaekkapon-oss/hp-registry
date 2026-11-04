@@ -1,10 +1,11 @@
 import crypto from 'crypto';
+import os from 'os';
 import type { Request, Response, NextFunction } from 'express';
 import type { EnterpriseRecord, EnterpriseRole } from '../types';
 import { getPool } from './mysql';
 import { effectiveMenus, MENU_IDS, normalizeMenus } from './menus';
 import { HosError, hosConfigured, verifyHosPassword } from './hosxp';
-import { getSecuritySettings } from './settings';
+import { decryptSecret, encryptSecret, getSecuritySettings } from './settings';
 
 /**
  * Server-side authentication, sessions and authorization.
@@ -259,10 +260,100 @@ setInterval(() => {
   }
 }, 60_000).unref();
 
+// ---- Keep people signed in across a restart (every deploy restarts the server) ----
+// Sessions live in memory; a snapshot is kept in the database (each one AES-GCM encrypted, cookie value included)
+// and read back when the server starts. Sign-outs and revocations are written within seconds, so a restart
+// cannot bring a revoked session back.
+
+// The dev machine may share the database with the real server: each one keeps only its own snapshot
+const INSTANCE = `${os.hostname()}:${process.env.NODE_ENV ?? 'development'}`.slice(0, 100);
+
+let tableReady = false;
+async function ensureSessionTable(): Promise<void> {
+  if (tableReady) return;
+  await getPool().query('CREATE TABLE IF NOT EXISTS app_sessions (id INT AUTO_INCREMENT PRIMARY KEY, instance VARCHAR(100) NOT NULL, payload TEXT NOT NULL, INDEX idx_app_sessions_instance (instance)) DEFAULT CHARSET=utf8mb4');
+  tableReady = true;
+}
+
+let saving: Promise<void> | null = null;
+let saveAgain = false;
+export async function saveSessionSnapshot(): Promise<void> {
+  if (saving) {
+    saveAgain = true;
+    return saving;
+  }
+  saving = (async () => {
+    try {
+      await ensureSessionTable();
+      const now = Date.now();
+      const rows = [...sessions]
+        .filter(([, sess]) => now - sess.lastSeen <= idleMs() && now - sess.createdAt <= ABSOLUTE_TIMEOUT_MS)
+        .map(([sid, sess]) => [INSTANCE, encryptSecret(JSON.stringify({ sid, ...sess }))]);
+      const conn = await getPool().getConnection();
+      try {
+        await conn.beginTransaction();
+        await conn.query('DELETE FROM app_sessions WHERE instance = ?', [INSTANCE]);
+        if (rows.length) await conn.query('INSERT INTO app_sessions (instance, payload) VALUES ?', [rows]);
+        await conn.commit();
+      } catch (e) {
+        await conn.rollback().catch(() => undefined);
+        throw e;
+      } finally {
+        conn.release();
+      }
+    } catch (e) {
+      console.error('[auth] could not save sessions:', (e as Error).message);
+    } finally {
+      saving = null;
+    }
+  })();
+  await saving;
+  if (saveAgain) {
+    saveAgain = false;
+    await saveSessionSnapshot();
+  }
+}
+
+let saveTimer: NodeJS.Timeout | null = null;
+/** Sign-in, sign-out, lock and revoke: write soon (debounced) */
+function scheduleSave(): void {
+  if (saveTimer) return;
+  saveTimer = setTimeout(() => {
+    saveTimer = null;
+    void saveSessionSnapshot();
+  }, 2000);
+  saveTimer.unref();
+}
+// Idle timers move on every request; refresh the snapshot every 30 s
+setInterval(() => void saveSessionSnapshot(), 30_000).unref();
+
+/** Called once at start-up, before the server accepts requests */
+export async function loadSessionSnapshot(): Promise<number> {
+  try {
+    await ensureSessionTable();
+    const [rows] = await getPool().query<import('mysql2/promise').RowDataPacket[]>('SELECT payload FROM app_sessions WHERE instance = ?', [INSTANCE]);
+    const now = Date.now();
+    let restored = 0;
+    for (const r of rows) {
+      const plain = decryptSecret(String(r.payload));
+      if (!plain) continue;
+      const { sid, ...sess } = JSON.parse(plain) as Session & { sid: string };
+      if (now - sess.lastSeen > idleMs() || now - sess.createdAt > ABSOLUTE_TIMEOUT_MS) continue;
+      sessions.set(sid, sess);
+      restored += 1;
+    }
+    return restored;
+  } catch (e) {
+    console.error('[auth] could not restore sessions:', (e as Error).message);
+    return 0;
+  }
+}
+
 export function createSession(user: AuthUser, origin: { ip: string; userAgent: string; hasTotp?: boolean } = { ip: '', userAgent: '' }): string {
   const sid = crypto.randomBytes(32).toString('base64url');
   const now = Date.now();
   sessions.set(sid, { user, createdAt: now, lastSeen: now, locked: false, pinFails: 0, hasTotp: Boolean(origin.hasTotp), ip: origin.ip, userAgent: origin.userAgent.slice(0, 300) });
+  scheduleSave();
   return sid;
 }
 
@@ -305,6 +396,7 @@ export function lockSession(sid: string): boolean {
   if (!s) return false;
   s.locked = true;
   s.pinFails = 0;
+  scheduleSave();
   return true;
 }
 
@@ -313,6 +405,7 @@ export function unlockSession(sid: string): void {
   if (s) {
     s.locked = false;
     s.pinFails = 0;
+    scheduleSave();
   }
 }
 
@@ -357,17 +450,19 @@ export function revokeOtherSessions(username: string, currentSid: string | undef
     sessions.delete(sid);
     n += 1;
   }
+  if (n) scheduleSave();
   return n;
 }
 
 export function destroySession(sid: string | undefined): void {
-  if (sid) sessions.delete(sid);
+  if (sid && sessions.delete(sid)) scheduleSave();
 }
 
 /** After an admin changes someone's access, make them sign in again so the change applies immediately */
 export function revokeSessionsFor(usernames: string[]): void {
   const wanted = new Set(usernames.map((u) => u.toLowerCase()));
   for (const [sid, s] of sessions) if (wanted.has(s.user.username.toLowerCase())) sessions.delete(sid);
+  scheduleSave();
 }
 
 function parseCookies(header: string | undefined): Record<string, string> {

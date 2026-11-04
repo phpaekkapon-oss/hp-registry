@@ -25,6 +25,7 @@ import { apiClient } from './services/apiClient';
 import { DEFAULT_SIDEBAR_STYLE, readSidebarStyle, saveSidebarStyle, type SidebarStyle } from './services/sidebarStyle';
 import { PrefetchCacheEntry, RadiusTokenPreset, SecurityScopeProvider, SyncEngineStatus } from './components/compound/EnterprisePrimitives';
 
+import type { SettingsSectionId } from './features/settings/SettingsHub';
 const SettingsHub = lazy(() => import('./features/settings/SettingsHub').then((m) => ({ default: m.SettingsHub })));
 
 const HomeView = lazy(() => import('./features/home/HomeView').then((m) => ({ default: m.HomeView })));
@@ -71,6 +72,8 @@ function AppShell({ user, onLogout }: { user: AuthUser; onLogout: () => Promise<
   const [activeNav, setActiveNavState] = useState<NavSection>(getInitialNav);
   /** A notification or menu asked to open a register: the page switches and the register's tab is selected */
   const [openTab, setOpenTab] = useState<{ tab: string; nonce: number } | null>(getInitialTab);
+  // Open the settings page straight at one section (e.g. the bell → notification centre)
+  const [settingsRequest, setSettingsRequest] = useState<{ section: SettingsSectionId; nonce: number } | null>(null);
 
   const setActiveNav = useCallback((nav: NavSection) => {
     setActiveNavState(nav);
@@ -294,6 +297,10 @@ function AppShell({ user, onLogout }: { user: AuthUser; onLogout: () => Promise<
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
           onSelectSettings={() => setActiveNav('settings')}
+          onOpenNotificationCenter={() => {
+            setSettingsRequest({ section: 'notifications', nonce: Date.now() });
+            setActiveNav('settings');
+          }}
           onOpenTab={handleOpenProcureTab}
           currentRole={currentRole}
           user={user}
@@ -353,6 +360,7 @@ function AppShell({ user, onLogout }: { user: AuthUser; onLogout: () => Promise<
                     onSelectTheme={setActiveTheme}
                     isDarkMode={isDarkMode}
                     onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
+                    requested={settingsRequest}
                   />
                 )}
               </Suspense>

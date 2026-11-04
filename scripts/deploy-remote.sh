@@ -40,7 +40,8 @@ fi
 echo "[remote] restarting pm2 ($APP_NAME) with PM2_HOME=$PM2_HOME"
 # delete + start (not restart) so the process always runs from APP_DIR, even if it was started elsewhere before
 pm2 delete "$APP_NAME" >/dev/null 2>&1 || true
-pm2 start npm --name "$APP_NAME" --cwd "$APP_DIR" -- start
+# --kill-timeout: give the app time to save signed-in sessions before it stops (people stay signed in across a deploy)
+pm2 start npm --name "$APP_NAME" --cwd "$APP_DIR" --kill-timeout 5000 -- start
 pm2 save
 pm2 status "$APP_NAME"
 

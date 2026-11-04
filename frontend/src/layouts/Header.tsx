@@ -78,6 +78,8 @@ interface HeaderProps {
   onToggleOfflineMode?: () => void;
   /** Open a procurement register (from a notification) */
   onOpenTab?: (tab: string) => void;
+  /** Settings → notification centre (full history and preferences) */
+  onOpenNotificationCenter?: () => void;
 }
 
 const SECTION_TITLES: Record<NavSection, { full: string; mobile: string }> = {
@@ -140,6 +142,7 @@ export const Header: React.FC<HeaderProps> = ({
   pendingOutboxCount = 0,
   onToggleOfflineMode,
   onOpenTab,
+  onOpenNotificationCenter,
 }) => {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -204,7 +207,9 @@ export const Header: React.FC<HeaderProps> = ({
   const { data: bell, markRead } = useNotifications();
   const [bellOpen, setBellOpen] = useState(false);
   const connectionWarnings = notifications.filter((n) => n.tone === 'warn');
-  const alertCount = connectionWarnings.length + (bell?.alerts.length ?? 0) + (bell?.unread ?? 0);
+  // Only what is NEW counts: unread changes and alerts not seen yet. Known alerts stay listed but do not keep the badge on.
+  const hasNew = (bell?.unread ?? 0) + (bell?.newAlerts ?? 0) > 0;
+  const alertCount = connectionWarnings.length + (bell?.newAlerts ?? 0) + (bell?.unread ?? 0);
 
   useEffect(() => {
     const sync = () => setIsFullscreen(Boolean(document.fullscreenElement));
@@ -491,7 +496,7 @@ export const Header: React.FC<HeaderProps> = ({
             onOpenChange={(open) => {
               setBellOpen(open);
               // Closing the bell counts as having read what was in it
-              if (!open && (bell?.unread ?? 0) > 0) void markRead();
+              if (!open && hasNew) void markRead();
             }}
           >
             <Popover.Trigger asChild>
@@ -517,9 +522,9 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <div className="flex items-center justify-between gap-2 px-1 pb-2 mb-2 border-b border-slate-100 dark:border-[var(--token-border-subtle)]">
                   <p className="text-sm font-bold text-ink">การแจ้งเตือน</p>
-                  {(bell?.unread ?? 0) > 0 && (
-                    <button type="button" onClick={() => void markRead()} className="text-xs font-semibold underline cursor-pointer">
-                      อ่านทั้งหมดแล้ว
+                  {hasNew && (
+                    <button type="button" onClick={() => void markRead()} className="text-xs font-semibold text-brand hover:underline cursor-pointer">
+                      ทำเครื่องหมายว่าอ่านแล้ว
                     </button>
                   )}
                 </div>
@@ -551,7 +556,8 @@ export const Header: React.FC<HeaderProps> = ({
                               className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-slate-900 hover:bg-slate-50 dark:text-slate-100 dark:hover:bg-slate-800/60 cursor-pointer"
                             >
                               <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${al.tone === 'bad' ? 'bg-rose-500' : 'bg-amber-500'}`} aria-hidden />
-                              <span>{al.text}</span>
+                              <span className={`min-w-0 flex-1 ${al.isNew ? 'font-semibold' : ''}`}>{al.text}</span>
+                              {al.isNew && <span className="shrink-0 rounded-full bg-rose-500/15 px-1.5 py-0.5 text-[11px] font-bold text-rose-700 dark:text-rose-300">ใหม่</span>}
                             </button>
                           </li>
                         ))}
@@ -596,6 +602,18 @@ export const Header: React.FC<HeaderProps> = ({
                     </p>
                   )}
                 </div>
+                {onOpenNotificationCenter && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBellOpen(false);
+                      onOpenNotificationCenter();
+                    }}
+                    className="mt-2 flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-lg border-t border-slate-100 pt-2 text-sm font-semibold text-brand hover:bg-slate-50 dark:border-[var(--token-border-subtle)] dark:hover:bg-[var(--token-surface-elevated)] cursor-pointer"
+                  >
+                    ดูประวัติทั้งหมดและตั้งค่าการแจ้งเตือน
+                  </button>
+                )}
               </Popover.Content>
             </Popover.Portal>
           </Popover.Root>

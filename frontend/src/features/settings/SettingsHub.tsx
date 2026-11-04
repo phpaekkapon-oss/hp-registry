@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { Bot, ShieldAlert, ChevronLeft, ChevronRight, DatabaseBackup, Fingerprint, History, Info, LayoutGrid, ListChecks, Lock, Palette, Plug, Settings, ShieldCheck, Users } from 'lucide-react';
+import { Bell, Bot, ShieldAlert, ChevronLeft, ChevronRight, DatabaseBackup, Fingerprint, History, Info, LayoutGrid, ListChecks, Lock, Palette, Plug, Settings, ShieldCheck, Users } from 'lucide-react';
 import type { AuthUser } from '../../services/authService';
 import type { ThemeColorConfig } from '../../services/themeService';
 import { SecuritySettings } from '../auth/SecuritySettings';
@@ -10,10 +10,11 @@ import { BackupSection } from './BackupSection';
 
 const UserAdminView = lazy(() => import('../users/UserAdminView').then((m) => ({ default: m.UserAdminView })));
 const LookupsSection = lazy(() => import('./LookupsSection').then((m) => ({ default: m.LookupsSection })));
+const NotificationsSection = lazy(() => import('./NotificationsSection').then((m) => ({ default: m.NotificationsSection })));
 const AiSection = lazy(() => import('./AiSection').then((m) => ({ default: m.AiSection })));
 const AuditView = lazy(() => import('../audit/AuditView').then((m) => ({ default: m.AuditView })));
 
-export type SettingsSectionId = 'lookups' | 'users' | 'security' | 'twofa' | 'audit' | 'providers' | 'connections' | 'backup' | 'about' | 'theme' | 'ai';
+export type SettingsSectionId = 'lookups' | 'users' | 'security' | 'twofa' | 'audit' | 'providers' | 'connections' | 'backup' | 'about' | 'theme' | 'ai' | 'notifications';
 
 interface Props {
   user: AuthUser;
@@ -105,6 +106,7 @@ export const SettingsHub: React.FC<Props> = ({ user, activeTheme, onSelectTheme,
       { id: 'ai', group: 'system', icon: Bot, tone: 'from-fuchsia-500 to-violet-600', title: 'ผู้ช่วย AI', sub: 'สลับโมเดลอัตโนมัติ · เขียนบันทึกเวอร์ชันตอน deploy · ดูความเคลื่อนไหวสด', adminOnly: true, visible: isAdmin },
       { id: 'backup', group: 'system', icon: DatabaseBackup, tone: 'from-amber-500 to-orange-600', title: 'สำรองข้อมูล', sub: 'สำรองอัตโนมัติทุกวัน · สำรองตอนนี้ · รายการไฟล์', adminOnly: true, visible: isAdmin },
       { id: 'about', group: 'system', icon: Info, tone: 'from-purple-500 to-indigo-600', title: 'เกี่ยวกับระบบ', sub: 'เวอร์ชัน · โหมดการทำงาน · เวลาเซิร์ฟเวอร์', visible: true },
+      { id: 'notifications', group: 'general', icon: Bell, tone: 'from-rose-500 to-orange-500', title: 'การแจ้งเตือน', sub: 'เรื่องที่ต้องดำเนินการ · ประวัติทั้งหมด · เลือกทะเบียนที่แจ้ง', visible: true },
       { id: 'theme', group: 'general', icon: Palette, tone: 'from-emerald-500 to-teal-600', title: 'ธีมและการแสดงผล', sub: 'โทนสี 16 เฉด · ความโค้งมน · โหมดมืด/สว่าง', visible: user.menus.includes('settings') },
     ],
     [isAdmin, user.menus]
@@ -144,6 +146,8 @@ export const SettingsHub: React.FC<Props> = ({ user, activeTheme, onSelectTheme,
         return <BackupSection />;
       case 'ai':
         return <AiSection />;
+      case 'notifications':
+        return <NotificationsSection menus={user.menus} />;
       case 'about':
         return <AboutSection />;
       case 'theme':

@@ -153,15 +153,30 @@ function aiNotes(version, commits, files) {
   return { title: out.title, kind: out.kind, highlights: out.highlights };
 }
 
-function fallbackNotes(commits) {
+// Without the AI, name the parts of the app that changed (from the file paths) instead of a generic line
+const AREAS = [
+  [/settings\/BackupSection|services\/backup/, 'หน้าสำรองข้อมูล'],
+  [/settings\/(AiSection|aiApi)|services\/ai|routes\/ai/, 'หน้าผู้ช่วย AI'],
+  [/features\/settings|routes\/system/, 'หน้าตั้งค่าระบบ'],
+  [/features\/home/, 'หน้าแรก'],
+  [/features\/procure|routes\/procure/, 'งานพัสดุ (ทะเบียนและรายงาน)'],
+  [/features\/(auth|users)|routes\/(auth|security|users)/, 'การเข้าสู่ระบบและความปลอดภัย'],
+  [/features\/audit|services\/audit/, 'ประวัติการใช้งาน'],
+  [/layouts\/|components\//, 'แถบเมนูและหน้าจอหลัก'],
+  [/index\.css|tailwind|fonts\//, 'หน้าตาและสีของระบบ'],
+];
+
+function fallbackNotes(commits, files) {
   const lines = commits
     .map((c) => c.replace(/^\w+(\([^)]*\))?!?:\s*/, '').trim())
     .filter(Boolean)
     .slice(0, 5);
+  const areas = [...new Set(files.flatMap((f) => AREAS.filter(([re]) => re.test(f)).map(([, name]) => name)))].slice(0, 5);
+  const highlights = lines.length ? lines : areas.map((a) => `ปรับปรุง${a}`);
   return {
-    title: 'ปรับปรุงระบบ',
+    title: areas.length && !lines.length ? `ปรับปรุง${areas.slice(0, 2).join(' และ')}` : 'ปรับปรุงระบบ',
     kind: 'patch',
-    highlights: lines.length ? lines : ['ปรับปรุงประสิทธิภาพและแก้ไขข้อผิดพลาดเล็กน้อย'],
+    highlights: highlights.length ? highlights : ['ปรับปรุงประสิทธิภาพและแก้ไขข้อผิดพลาดเล็กน้อย'],
   };
 }
 
@@ -197,7 +212,7 @@ function autoRelease() {
     version = patchNext;
     console.log(`${C.dim}    ใช้บันทึก v${version} ที่เขียนไว้แล้วใน changelog.ts${C.reset}`);
   } else {
-    const notes = aiNotes(patchNext, commits, files) || fallbackNotes(commits);
+    const notes = aiNotes(patchNext, commits, files) || fallbackNotes(commits, files);
     version = nextVersion(pkg.version, notes.kind);
     const entry = [
       '  {',
