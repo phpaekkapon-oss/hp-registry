@@ -135,6 +135,10 @@ const stamp = (r: ReleaseNote): string =>
     ? `${new Date(r.at).toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', year: 'numeric' })} ${formatTime(r.at)} น.`
     : new Date(`${r.date}T00:00:00`).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
 
+/** Short date for the version list (the time is shown in the detail pane) */
+const shortDate = (r: ReleaseNote): string =>
+  new Date(r.at ?? `${r.date}T00:00:00`).toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', year: 'numeric' });
+
 /** Full release history: searchable version list on the left, the chosen release on the right */
 const ReleaseHistory: React.FC<{ onBack?: () => void; closable: boolean }> = ({ onBack, closable }) => {
   const [selected, setSelected] = useState(RUNNING?.version ?? '');
@@ -183,7 +187,7 @@ const ReleaseHistory: React.FC<{ onBack?: () => void; closable: boolean }> = ({ 
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
-        <div className="flex max-h-56 shrink-0 flex-col gap-2.5 border-b border-chroma-subtle p-3 sm:max-h-none sm:w-72 sm:border-b-0 sm:border-r">
+        <div className="flex max-h-56 shrink-0 flex-col gap-2.5 border-b border-chroma-subtle p-3 sm:max-h-none sm:w-[19rem] sm:border-b-0 sm:border-r">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-4" aria-hidden="true" />
             <input
@@ -230,11 +234,11 @@ const ReleaseHistory: React.FC<{ onBack?: () => void; closable: boolean }> = ({ 
                   >
                     <span className="flex items-center gap-2">
                       <GitBranch className={`h-3.5 w-3.5 shrink-0 ${active ? 'text-brand' : 'text-ink-4'}`} aria-hidden="true" />
-                      <span className="text-sm font-bold text-ink">v{r.version}</span>
+                      <span className="shrink-0 text-sm font-bold text-ink">v{r.version}</span>
                       {r.version === __APP_VERSION__ && (
-                        <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">ใช้งานอยู่</span>
+                        <span className="shrink-0 whitespace-nowrap rounded bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">ใช้งานอยู่</span>
                       )}
-                      <span className="ml-auto shrink-0 text-[11px] text-ink-5">{stamp(r)}</span>
+                      <span className="ml-auto shrink-0 whitespace-nowrap text-[11px] text-ink-5">{shortDate(r)}</span>
                     </span>
                     <span className="mt-1 block truncate text-xs text-ink-3">{r.title}</span>
                   </button>
@@ -255,7 +259,6 @@ const ReleaseHistory: React.FC<{ onBack?: () => void; closable: boolean }> = ({ 
                 <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-4">
                   <CalendarDays className="h-4 w-4" aria-hidden="true" />
                   <span>เผยแพร่เมื่อ {stamp(current)}</span>
-                  <span aria-hidden>·</span>
                   <span>ประเภท: <strong className={`font-semibold ${KIND_TONE[current.kind]}`}>{KIND_LABEL[current.kind]}</strong></span>
                 </p>
               </div>
