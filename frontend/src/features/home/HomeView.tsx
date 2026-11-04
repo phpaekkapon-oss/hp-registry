@@ -388,6 +388,7 @@ export const HomeView: React.FC<Props> = ({ onOpen, onOpenSecurity }) => {
               ))}
             </div>
             <Select
+              key={mode}
               ariaLabel={mode === 'calendar' ? 'เลือกปี พ.ศ.' : 'เลือกปีงบประมาณ'}
               value={String(fy)}
               onValueChange={(v) => setPickedYear(Number(v) === nowYear ? null : Number(v))}

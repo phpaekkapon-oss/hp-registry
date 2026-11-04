@@ -4,7 +4,7 @@ import path from 'path';
 import {readFileSync} from 'fs';
 import {defineConfig, type Plugin} from 'vite';
 
-// Single source of truth for the version shown in the app: the root package.json (bumped by release.bat).
+// Single source of truth for the version shown in the app: the root package.json (bumped by deploy.bat on every deploy).
 const rootPkg = JSON.parse(readFileSync(path.resolve(__dirname, '../package.json'), 'utf8')) as {
   version: string;
   repository?: string | { url?: string };

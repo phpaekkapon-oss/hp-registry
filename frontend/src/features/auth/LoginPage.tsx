@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { InstallHelpDialog } from '../../components/InstallHelpDialog';
 import {
+  PlugZap,
   Building2,
   ShieldCheck,
   LockKeyhole,
@@ -24,7 +25,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { GOVERNMENT_THEMES } from '../../services/themeService';
-import { apiClient } from '../../services/apiClient';
+import * as Dialog from '@radix-ui/react-dialog';
+import { apiClient, resolveApiUrl } from '../../services/apiClient';
 import { setBrowserThemeColor, useInstallApp } from '../../services/pwa';
 import { authService, type ProviderButton } from '../../services/authService';
 
@@ -106,6 +108,8 @@ export const LoginPage: React.FC = () => {
   const [totpTicket, setTotpTicket] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState('');
   const [providers, setProviders] = useState<ProviderButton[]>([]);
+  /** The external sign-in the person tried while it is not connected yet (shows the explanation dialog) */
+  const [notReady, setNotReady] = useState<ProviderButton | null>(null);
   /** Days a browser can be remembered after passing 2FA (0 = the admin turned it off) */
   const [trustDays, setTrustDays] = useState(0);
   const [remember, setRemember] = useState(false);
@@ -465,7 +469,13 @@ export const LoginPage: React.FC = () => {
                   {providers.map((p) => (
                     <a
                       key={p.id}
-                      href={`/api/auth/oauth/${p.id}/start`}
+                      href={resolveApiUrl(`/api/auth/oauth/${p.id}/start`)}
+                      onClick={(e) => {
+                        if (p.ready === false) {
+                          e.preventDefault();
+                          setNotReady(p);
+                        }
+                      }}
                       className="min-h-[48px] rounded-xl border border-chroma-subtle bg-chroma-elevated hover:border-chroma-optical text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors"
                     >
                       {p.id === 'thaid' ? <IdCard className="w-4 h-4 text-brand" aria-hidden="true" /> : <BadgeCheck className="w-4 h-4 text-brand" aria-hidden="true" />}
@@ -475,6 +485,37 @@ export const LoginPage: React.FC = () => {
                 </div>
               </div>
             )}
+
+            <Dialog.Root open={notReady !== null} onOpenChange={(o) => !o && setNotReady(null)}>
+              <Dialog.Portal>
+                <Dialog.Overlay className="fixed inset-0 z-[80] bg-slate-900/60 backdrop-blur-sm" />
+                <Dialog.Content className="fixed left-1/2 top-1/2 z-[80] w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-chroma-subtle bg-chroma-card p-6 text-center shadow-2xl focus:outline-none">
+                  <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-500/15" aria-hidden>
+                    <PlugZap className="h-7 w-7 text-amber-600 dark:text-amber-300" />
+                  </span>
+                  <Dialog.Title className="mt-4 font-prompt text-lg font-bold text-ink">
+                    {notReady?.label} ยังไม่ได้เชื่อมต่อกับระบบ
+                  </Dialog.Title>
+                  <Dialog.Description className="mt-2 text-sm leading-relaxed text-ink-3">
+                    ตอนนี้ยังเข้าสู่ระบบด้วย {notReady?.label} ไม่ได้ เพราะผู้ดูแลระบบยังตั้งค่าการเชื่อมต่อไม่ครบ
+                    กรุณาเข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่านไปก่อน
+                  </Dialog.Description>
+                  <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2.5 text-left text-xs leading-relaxed text-ink-4 dark:bg-white/5">
+                    สำหรับผู้ดูแลระบบ: ตั้งค่าระบบ → ThaID / Provider ID แล้วกรอก Client ID, Client Secret และ URL ให้ครบ
+                  </p>
+                  <Dialog.Close asChild>
+                    <button
+                      type="button"
+                      autoFocus
+                      onClick={() => usernameRef.current?.focus()}
+                      className="btn-brand mt-5 inline-flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-xl text-sm font-bold"
+                    >
+                      เข้าใจแล้ว เข้าสู่ระบบด้วยรหัสผ่าน
+                    </button>
+                  </Dialog.Close>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
 
             <p className="mt-5 text-center text-xs text-ink-4">
               ลืมรหัสผ่านหรือไม่มีบัญชี? กรุณาติดต่อผู้ดูแลระบบของหน่วยงาน

@@ -6,7 +6,6 @@ import {
   destroySession,
   lockoutSecondsRemaining,
   recordLoginFailure,
-  requireSession,
   setSessionCookie,
   authenticate,
   hashPassword,
@@ -166,7 +165,10 @@ authRouter.post('/logout', async (req: Request, res: Response) => {
 
 // GET /api/auth/me
 // Also answers while the screen is locked, so a reload can show the lock screen
-authRouter.get('/me', requireSession, async (req: Request, res: Response) => {
+// Not signed in is a normal answer here (every page load asks), so it is 200 + data: null rather than a 401
+// that browsers print in red in the console
+authRouter.get('/me', async (req: Request, res: Response) => {
+  if (!req.auth) return res.json({ success: true, data: null });
   res.json({ success: true, data: { user: req.auth!.user, security: await securityInfo(req.auth!.user), locked: req.auth!.locked } });
 });
 

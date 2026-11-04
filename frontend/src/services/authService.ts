@@ -48,6 +48,8 @@ export type LoginResult =
 export interface ProviderButton {
   id: 'thaid' | 'providerid';
   label: string;
+  /** Switched on AND fully configured (client id/secret, URLs); otherwise the button only explains why it cannot be used */
+  ready: boolean;
 }
 
 /** Everything stored on this device that may contain patient data or drafts */
@@ -104,7 +106,7 @@ export const authService = {
       const res = await fetch(resolveApiUrl('/api/auth/me'));
       if (res.status === 401) return null;
       if (!res.ok) return undefined;
-      return (await res.json()).data as SessionInfo;
+      return ((await res.json()).data ?? null) as SessionInfo | null;
     } catch {
       return undefined;
     }

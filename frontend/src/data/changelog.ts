@@ -10,10 +10,22 @@ export interface ReleaseNote {
 }
 
 /**
- * Newest first. release.bat refuses to publish a version that has no entry here,
- * so every version tagged on GitHub is also described in the app.
+ * Newest first. deploy.bat adds an entry on every deploy (written by the AI assistant, or from the commit
+ * messages when the AI is unavailable); an entry written by hand for the next version is used as is.
  */
 export const CHANGELOG: ReleaseNote[] = [
+  {
+    version: '1.0.2',
+    date: '2026-11-04',
+    title: 'ผู้ช่วย AI และการแจ้งเวอร์ชันใหม่',
+    kind: 'minor',
+    highlights: [
+      'เพิ่มหน้าตั้งค่า "ผู้ช่วย AI" สำหรับผู้ดูแลระบบ: สลับโมเดลอัตโนมัติเมื่อโมเดลใดใช้งานไม่ได้ พร้อมภาพ 3 มิติแสดงการสลับแบบสด',
+      'ทุกครั้งที่อัปเดตระบบ จะแสดงหน้า "มีอะไรใหม่" และต้องกดรับทราบก่อนเริ่มใช้งาน',
+      'แจ้งเตือนทันทีเมื่อมีเวอร์ชันใหม่ระหว่างที่เปิดระบบค้างไว้ พร้อมปุ่มอัปเดตเมื่อพร้อม',
+      'แก้หน้าจอค้างเมื่อสลับปีงบประมาณ/ปี พ.ศ. ในหน้าแรก และปิดการแปลภาษาอัตโนมัติของเบราว์เซอร์ที่ทำให้ข้อความเพี้ยน',
+    ],
+  },
   {
     version: '1.0.1',
     date: '2026-11-04',

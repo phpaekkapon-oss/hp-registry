@@ -32,7 +32,8 @@ securityRouter.get('/config', (_req: Request, res: Response) => {
   res.json({
     success: true,
     data: {
-      providers: (Object.keys(p) as ProviderId[]).filter((id) => p[id].enabled).map((id) => ({ id, label: PROVIDER_LABEL[id] })),
+      // ready = fully configured; the login page warns (instead of leaving the page) when it is not
+      providers: (Object.keys(p) as ProviderId[]).filter((id) => p[id].enabled).map((id) => ({ id, label: PROVIDER_LABEL[id], ready: providerReady(p[id]) })),
       trustDeviceDays: getSecuritySettings().trustDeviceDays,
     },
   });

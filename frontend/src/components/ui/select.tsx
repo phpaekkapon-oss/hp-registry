@@ -43,7 +43,9 @@ export const Select: React.FC<SelectProps> = ({ value, onValueChange, options, p
       )}
     >
       <span className="min-w-0 truncate">
-        <RadixSelect.Value placeholder={placeholder} />
+        {/* Render the chosen label ourselves: otherwise Radix portals the item text into this span, and swapping
+            the option list (or browser auto-translate) then crashes React with "removeChild ... not a child" */}
+        <RadixSelect.Value placeholder={placeholder}>{options.find((o) => enc(o.value) === enc(value))?.label}</RadixSelect.Value>
       </span>
       <RadixSelect.Icon>
         <ChevronDown className="h-4 w-4 shrink-0 opacity-60" aria-hidden />

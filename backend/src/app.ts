@@ -8,6 +8,7 @@ import { procureRouter } from './routes/procure';
 import { usersRouter } from './routes/users';
 import { auditRouter } from './routes/audit';
 import { notificationsRouter } from './routes/notifications';
+import { aiRouter } from './routes/ai';
 import { attachSession, requireAuth } from './services/auth';
 
 /** Extra browser origins allowed to call the API, e.g. a reverse proxy name: ALLOWED_ORIGINS=intranet.example.go.th */
@@ -67,6 +68,7 @@ export function createBackendApp(): Express {
   app.use('/users', requireAuth, usersRouter);
   app.use('/audit', requireAuth, auditRouter);
   app.use('/notifications', requireAuth, notificationsRouter);
+  app.use('/ai', aiRouter);
 
   // Fallback 404 for unmatched /api routes
   app.use((_req, res) => {
