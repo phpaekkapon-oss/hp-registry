@@ -37,7 +37,7 @@ export const InstallHelpDialog: React.FC<InstallHelpDialogProps> = ({ open, onOp
       title: 'คอมพิวเตอร์ (Chrome / Edge)',
       items: [
         'มองหาไอคอนติดตั้ง (จอคอมมีลูกศรลง) ที่ปลายช่องที่อยู่เว็บไซต์ แล้วคลิก',
-        'หรือเปิดเมนู ⋮ แล้วเลือก “ส่ง แคสต์ และบันทึก” → “ติดตั้งหน้านี้เป็นแอป” (Edge: เมนู … → “แอป” → “ติดตั้งไซต์นี้เป็นแอป”)',
+        'หรือคลิกเมนู ⋮ มุมขวาบน → “แคสต์ บันทึก และแชร์” → “ติดตั้งหน้าเว็บเป็นแอป...” (Edge: เมนู … → “แอป” → “ติดตั้งไซต์นี้เป็นแอป”)',
       ],
     });
   }
@@ -74,8 +74,8 @@ export const InstallHelpDialog: React.FC<InstallHelpDialogProps> = ({ open, onOp
             <p role="alert" className="mt-5 flex items-start gap-2.5 rounded-xl border border-amber-300 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-950/30 px-3.5 py-3 text-sm text-amber-900 dark:text-amber-200">
               <TriangleAlert className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />
               <span>
-                หน้านี้ไม่ได้เปิดผ่าน HTTPS เบราว์เซอร์จึงไม่เปิดให้ติดตั้ง (ติดตั้งได้เฉพาะ HTTPS หรือ localhost)
-                กรุณาให้ผู้ดูแลระบบตั้งค่า HTTPS
+                หน้านี้ไม่ได้เปิดผ่าน HTTPS ปุ่มติดตั้งอัตโนมัติจึงใช้ไม่ได้ และแอปจะไม่มีโหมดออฟไลน์ (ต้องเป็น HTTPS หรือ localhost)
+                แต่ยังเปิดเป็นหน้าต่างแอปได้ด้วยเมนู “ติดตั้งหน้าเว็บเป็นแอป...” ตามขั้นตอนด้านล่าง ถ้าต้องการแบบเต็ม กรุณาให้ผู้ดูแลระบบตั้งค่า HTTPS
               </span>
             </p>
           )}

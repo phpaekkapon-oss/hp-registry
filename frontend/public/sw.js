@@ -9,7 +9,9 @@
  */
 const CACHE_VERSION = 'v1';
 const STATIC_CACHE = `his-static-${CACHE_VERSION}`;
-const SHELL_URLS = ['/', '/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png'];
+// Relative on purpose: the app can live under a sub-path (/hp-registry/), the worker's scope is that folder
+const SHELL_URLS = ['./', 'manifest.webmanifest', 'favicon.svg', 'icons/icon-192.png'];
+const SHELL = new URL('./', self.registration.scope).href;
 
 // Build output files carry a content hash in the name, so they can be cached forever
 const HASHED_ASSET = /-[A-Za-z0-9_-]{8,}\.(?:js|css|woff2?)$/;
@@ -38,7 +40,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.startsWith('/api/')) return; // network only, never stored
+  if (url.pathname.includes('/api/')) return; // network only, never stored (also under a sub-path such as /hp-registry/api/)
   if (url.pathname.endsWith('/version.json')) return; // must always reach the server to detect a new deployment
 
   // Page loads: network first (always the newest app), fall back to the cached shell when offline
@@ -48,17 +50,17 @@ self.addEventListener('fetch', (event) => {
         .then((response) => {
           if (response.ok) {
             const copy = response.clone();
-            caches.open(STATIC_CACHE).then((cache) => cache.put('/', copy));
+            caches.open(STATIC_CACHE).then((cache) => cache.put(SHELL, copy));
           }
           return response;
         })
-        .catch(() => caches.match('/').then((cached) => cached || Response.error()))
+        .catch(() => caches.match(SHELL).then((cached) => cached || Response.error()))
     );
     return;
   }
 
   // Hashed build files and fonts: cache first
-  if (HASHED_ASSET.test(url.pathname) || url.pathname.startsWith('/fonts/')) {
+  if (HASHED_ASSET.test(url.pathname) || url.pathname.includes('/fonts/')) {
     event.respondWith(
       caches.match(request).then(
         (cached) =>

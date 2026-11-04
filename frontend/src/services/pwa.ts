@@ -28,7 +28,8 @@ if (typeof window !== 'undefined') {
  */
 export function registerServiceWorker(): void {
   if (!('serviceWorker' in navigator)) return;
-  const script = import.meta.env.PROD ? '/sw.js' : '/sw-dev.js';
+  // Relative to the site's base (the app is served under /hp-registry/): the worker's scope must cover the app's own pages
+  const script = `${import.meta.env.BASE_URL}${import.meta.env.PROD ? 'sw.js' : 'sw-dev.js'}`;
   window.addEventListener('load', () => {
     navigator.serviceWorker.register(script).catch((err) => console.warn('[pwa] service worker registration failed:', err));
   });
