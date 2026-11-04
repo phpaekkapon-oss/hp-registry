@@ -218,6 +218,7 @@ function autoRelease() {
       '  {',
       `    version: '${version}',`,
       `    date: '${bangkokToday()}',`,
+      `    at: '${new Date().toISOString()}',`,
       `    title: ${JSON.stringify(notes.title)},`,
       `    kind: '${notes.kind}',`,
       '    highlights: [',

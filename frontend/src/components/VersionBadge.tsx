@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { ArrowLeft, CheckCircle2, ExternalLink, GitBranch, History, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ArrowUpCircle, CalendarDays, CheckCircle2, ChevronRight, ExternalLink, GitBranch, History, Search, Sparkles, X, Zap } from 'lucide-react';
 import { CHANGELOG, type ReleaseKind, type ReleaseNote } from '../data/changelog';
 
 const KIND_LABEL: Record<ReleaseKind, string> = {
@@ -113,45 +113,69 @@ const WhatsNew: React.FC<{ onShowHistory: () => void }> = ({ onShowHistory }) =>
   </>
 );
 
-/** Full release history: version list on the left, the chosen release on the right */
+const KIND_TAB: { id: 'all' | ReleaseKind; label: string }[] = [
+  { id: 'all', label: 'ทั้งหมด' },
+  { id: 'major', label: 'Major' },
+  { id: 'minor', label: 'Minor' },
+  { id: 'patch', label: 'Patch' },
+];
+
+const KIND_TONE: Record<ReleaseKind, string> = {
+  major: 'text-rose-600 dark:text-rose-300',
+  minor: 'text-violet-600 dark:text-violet-300',
+  patch: 'text-emerald-600 dark:text-emerald-300',
+};
+
+const formatTime = (iso: string): string =>
+  new Intl.DateTimeFormat('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso));
+
+/** "4 พ.ย. 2569 09:07 น." when the release has a time, otherwise just the date */
+const stamp = (r: ReleaseNote): string =>
+  r.at
+    ? `${new Date(r.at).toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', year: 'numeric' })} ${formatTime(r.at)} น.`
+    : new Date(`${r.date}T00:00:00`).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+
+/** Full release history: searchable version list on the left, the chosen release on the right */
 const ReleaseHistory: React.FC<{ onBack?: () => void; closable: boolean }> = ({ onBack, closable }) => {
   const [selected, setSelected] = useState(RUNNING?.version ?? '');
-  const current = RELEASED.find((r) => r.version === selected) ?? RUNNING;
+  const [kind, setKind] = useState<'all' | ReleaseKind>('all');
+  const [query, setQuery] = useState('');
+
+  const list = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return RELEASED.filter((r) => (kind === 'all' || r.kind === kind) && (!q || `v${r.version} ${r.title} ${r.highlights.join(' ')}`.toLowerCase().includes(q)));
+  }, [kind, query]);
+  const current = list.find((r) => r.version === selected) ?? list[0];
   const url = current ? releaseUrl(current.version) : null;
+  const featured = current ? (current.highlights.length > 2 ? current.highlights.slice(0, 2) : current.highlights) : [];
+  const rest = current && current.highlights.length > 2 ? current.highlights.slice(2) : [];
 
   return (
     <>
-      <div className="flex items-start justify-between gap-3 border-b border-chroma-subtle p-5">
-        <div className="flex items-start gap-3.5">
-          {onBack ? (
-            <button
-              type="button"
-              onClick={onBack}
-              aria-label="กลับไปหน้ามีอะไรใหม่"
-              className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-brand-soft hover:opacity-90"
-            >
-              <ArrowLeft className="h-5 w-5 text-brand" aria-hidden="true" />
-            </button>
-          ) : (
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft">
-              <GitBranch className="h-5 w-5 text-brand" aria-hidden="true" />
-            </div>
-          )}
-          <div>
-            <Dialog.Title className="text-lg font-semibold text-ink">ประวัติการอัปเดตระบบ</Dialog.Title>
-            <Dialog.Description className="mt-1 text-sm text-ink-4">
-              ระบบงานพัสดุ · ใช้งานอยู่ v{__APP_VERSION__}
-              {builtAt() && ` · อัปเดตเมื่อ ${builtAt()} น.`}
-            </Dialog.Description>
+      <div className="flex items-start gap-3.5 border-b border-chroma-subtle p-5">
+        {onBack ? (
+          <button type="button" onClick={onBack} aria-label="กลับไปหน้ามีอะไรใหม่" className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-brand-soft hover:opacity-90">
+            <ArrowLeft className="h-5 w-5 text-brand" aria-hidden="true" />
+          </button>
+        ) : (
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft">
+            <ArrowUpCircle className="h-5 w-5 text-brand" aria-hidden="true" />
           </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <Dialog.Title className="text-lg font-semibold text-ink">บันทึกการอัปเดตระบบ</Dialog.Title>
+            <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-bold text-brand ring-1 ring-[var(--brand-accent)]/40">
+              <GitBranch className="h-3 w-3" aria-hidden="true" /> v{__APP_VERSION__} ใช้งานอยู่
+            </span>
+          </div>
+          <Dialog.Description className="mt-1 text-sm text-ink-4">
+            ประวัติเวอร์ชันและการปรับปรุงของระบบงานพัสดุ ({RELEASED.length} รุ่น){builtAt() && ` · อัปเดตล่าสุด ${builtAt()} น.`}
+          </Dialog.Description>
         </div>
         {closable && (
           <Dialog.Close asChild>
-            <button
-              type="button"
-              aria-label="ปิดหน้าต่าง"
-              className="-mr-2 -mt-1 inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-ink-2 dark:hover:bg-white/10 dark:hover:text-white"
-            >
+            <button type="button" aria-label="ปิดหน้าต่าง" className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-chroma-subtle text-slate-500 hover:bg-slate-100 hover:text-ink-2 dark:hover:bg-white/10 dark:hover:text-white">
               <X className="h-5 w-5" />
             </button>
           </Dialog.Close>
@@ -159,60 +183,122 @@ const ReleaseHistory: React.FC<{ onBack?: () => void; closable: boolean }> = ({ 
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
-        <ul className="max-h-40 shrink-0 space-y-1.5 overflow-y-auto border-b border-chroma-subtle p-3 sm:max-h-none sm:w-56 sm:border-b-0 sm:border-r" aria-label="รายการเวอร์ชัน">
-          {RELEASED.map((r) => {
-            const active = r.version === current?.version;
-            return (
-              <li key={r.version}>
+        <div className="flex max-h-56 shrink-0 flex-col gap-2.5 border-b border-chroma-subtle p-3 sm:max-h-none sm:w-72 sm:border-b-0 sm:border-r">
+          <label className="relative block">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-4" aria-hidden="true" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="ค้นหาเวอร์ชัน หรือรายการ..."
+              aria-label="ค้นหาเวอร์ชัน"
+              className="pf-field min-h-[40px] w-full rounded-lg pl-9 pr-3 text-sm"
+            />
+          </label>
+          <div className="flex items-center justify-between gap-2">
+            <div role="tablist" aria-label="ประเภทการอัปเดต" className="inline-flex rounded-lg bg-slate-100 p-0.5 ring-1 ring-inset ring-slate-200 dark:bg-white/5 dark:ring-white/10">
+              {KIND_TAB.map((t) => (
                 <button
+                  key={t.id}
                   type="button"
-                  onClick={() => setSelected(r.version)}
-                  aria-current={active ? 'true' : undefined}
-                  className={`w-full cursor-pointer rounded-xl border px-3 py-2.5 text-left transition-colors ${
-                    active ? 'border-[var(--brand-accent)] bg-brand-soft' : 'border-transparent hover:bg-slate-100 dark:hover:bg-white/5'
+                  role="tab"
+                  aria-selected={kind === t.id}
+                  onClick={() => setKind(t.id)}
+                  className={`min-h-[28px] cursor-pointer rounded-md px-2.5 text-xs font-semibold transition-colors ${
+                    kind === t.id ? 'bg-[var(--brand-strong)] text-white shadow-xs' : 'text-slate-600 hover:text-ink dark:text-slate-300 dark:hover:text-white'
                   }`}
                 >
-                  <span className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-bold text-ink">v{r.version}</span>
-                    {r.version === __APP_VERSION__ && (
-                      <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">ใช้งานอยู่</span>
-                    )}
-                  </span>
-                  <span className="mt-0.5 block truncate text-xs text-ink-4">{formatDate(r.date)}</span>
-                  <span className="block truncate text-xs text-ink-3">{r.title}</span>
+                  {t.label}
                 </button>
-              </li>
-            );
-          })}
-        </ul>
+              ))}
+            </div>
+            <span className="shrink-0 text-xs text-ink-4">{list.length} รุ่น</span>
+          </div>
 
-        {current && (
-          <div className="min-w-0 flex-1 overflow-y-auto p-5">
+          <ul className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-0.5" aria-label="รายการเวอร์ชัน">
+            {list.length === 0 && <li className="px-2 py-6 text-center text-sm text-ink-4">ไม่พบเวอร์ชันที่ค้นหา</li>}
+            {list.map((r) => {
+              const active = r.version === current?.version;
+              return (
+                <li key={r.version}>
+                  <button
+                    type="button"
+                    onClick={() => setSelected(r.version)}
+                    aria-current={active ? 'true' : undefined}
+                    className={`w-full cursor-pointer rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                      active ? 'border-[var(--brand-accent)] bg-brand-soft' : 'border-chroma-subtle hover:bg-slate-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <GitBranch className={`h-3.5 w-3.5 shrink-0 ${active ? 'text-brand' : 'text-ink-4'}`} aria-hidden="true" />
+                      <span className="text-sm font-bold text-ink">v{r.version}</span>
+                      {r.version === __APP_VERSION__ && (
+                        <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">ใช้งานอยู่</span>
+                      )}
+                      <span className="ml-auto shrink-0 text-[11px] text-ink-5">{stamp(r)}</span>
+                    </span>
+                    <span className="mt-1 block truncate text-xs text-ink-3">{r.title}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {current ? (
+          <div className="min-w-0 flex-1 overflow-y-auto p-5 sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h3 className="text-lg font-semibold text-ink">
-                  v{current.version} · {current.title}
-                </h3>
-                <p className="mt-1 text-sm text-ink-4">
-                  เผยแพร่เมื่อ {formatDate(current.date)} · {KIND_LABEL[current.kind]}
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className="rounded-lg bg-brand-soft px-2.5 py-1 text-sm font-bold text-brand ring-1 ring-[var(--brand-accent)]/40">v{current.version}</span>
+                  <h3 className="text-lg font-semibold text-ink">{current.title}</h3>
+                </div>
+                <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-4">
+                  <CalendarDays className="h-4 w-4" aria-hidden="true" />
+                  <span>เผยแพร่เมื่อ {stamp(current)}</span>
+                  <span aria-hidden>·</span>
+                  <span>ประเภท: <strong className={`font-semibold ${KIND_TONE[current.kind]}`}>{KIND_LABEL[current.kind]}</strong></span>
                 </p>
               </div>
               {url && (
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex min-h-[36px] items-center gap-2 rounded-lg border border-chroma-subtle px-3 text-xs font-semibold text-ink-2 hover:bg-slate-100 dark:hover:bg-white/5"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                  ดูบน GitHub
+                <a href={url} target="_blank" rel="noreferrer" className="inline-flex min-h-[40px] items-center gap-2 rounded-lg border border-chroma-subtle px-3 text-sm font-semibold text-ink-2 hover:bg-slate-100 dark:hover:bg-white/5">
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  Release v{current.version} บน GitHub
                 </a>
               )}
             </div>
-            <div className="mt-5">
-              <Highlights items={current.highlights} />
+
+            <div className="mt-5 border-t border-chroma-subtle pt-5">
+              <h4 className="flex items-center gap-2 text-sm font-bold text-brand">
+                <Sparkles className="h-4 w-4" aria-hidden="true" /> ไฮไลท์เด่นในเวอร์ชันนี้
+              </h4>
+              <ul className="mt-3 space-y-2.5">
+                {featured.map((h) => (
+                  <li key={h} className="flex items-start gap-3 rounded-xl border border-chroma-subtle px-4 py-3 text-sm leading-relaxed text-ink-2">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
+
+            {rest.length > 0 && (
+              <div className="mt-5">
+                <h4 className="flex items-center gap-2 text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                  <Zap className="h-4 w-4" aria-hidden="true" /> รายการปรับปรุงอื่นๆ
+                </h4>
+                <ul className="mt-2.5 space-y-2">
+                  {rest.map((h) => (
+                    <li key={h} className="flex items-start gap-2 text-sm leading-relaxed text-ink-3">
+                      <ChevronRight className="mt-1 h-3.5 w-3.5 shrink-0 text-ink-5" aria-hidden="true" />
+                      <span>{h}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
+        ) : (
+          <div className="flex flex-1 items-center justify-center p-8 text-sm text-ink-4">เลือกเวอร์ชันทางซ้ายเพื่อดูรายละเอียด</div>
         )}
       </div>
     </>

@@ -4,6 +4,8 @@ export interface ReleaseNote {
   version: string;
   /** ISO date (YYYY-MM-DD) */
   date: string;
+  /** When it was released (ISO date-time); older entries only have the date */
+  at?: string;
   title: string;
   kind: ReleaseKind;
   highlights: string[];
@@ -14,6 +16,16 @@ export interface ReleaseNote {
  * messages when the AI is unavailable); an entry written by hand for the next version is used as is.
  */
 export const CHANGELOG: ReleaseNote[] = [
+  {
+    version: '1.0.9',
+    date: '2026-11-04',
+    at: '2026-11-04T04:57:24.979Z',
+    title: "ปรับปรุงแถบเมนูและหน้าจอหลัก",
+    kind: 'patch',
+    highlights: [
+      "ปรับปรุงแถบเมนูและหน้าจอหลัก",
+    ],
+  },
   {
     version: '1.0.8',
     date: '2026-11-04',
