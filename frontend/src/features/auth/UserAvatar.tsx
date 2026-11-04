@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { initialOf } from '../../services/authService';
+import { resolveApiUrl } from '../../services/apiClient';
 import { useAuth } from './AuthContext';
 
 /**
@@ -8,7 +9,8 @@ import { useAuth } from './AuthContext';
  */
 export const UserAvatar: React.FC<{ name: string; className?: string }> = ({ name, className = 'h-9 w-9 rounded-lg text-sm' }) => {
   const { security } = useAuth();
-  const url = security.avatarUrl;
+  // The server sends /api/...; on the real server the app lives under /hp-registry/, so the base path must be added
+  const url = security.avatarUrl ? resolveApiUrl(security.avatarUrl) : null;
   const [broken, setBroken] = useState(false);
   useEffect(() => setBroken(false), [url]);
 

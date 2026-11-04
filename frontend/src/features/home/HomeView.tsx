@@ -60,7 +60,7 @@ function monthSlot(iso: unknown, year: number, mode: PeriodMode): number | null 
 
 const Card: React.FC<{ title: string; icon: React.ElementType; action?: React.ReactNode; children: React.ReactNode; className?: string }> = ({ title, icon: Icon, action, children, className = '' }) => (
   <section className={`gov-card flex flex-col ${className}`} aria-label={title}>
-    <div className="flex items-center gap-2.5 border-b border-slate-200 px-5 py-3.5 dark:border-white/10">
+    <div className="flex min-h-[56px] items-center gap-2.5 border-b border-slate-200 px-5 py-2 dark:border-white/10">
       <Icon className="h-[18px] w-[18px] text-brand" aria-hidden />
       <h2 className="font-prompt text-[15px] font-bold">{title}</h2>
       {action && <div className="ml-auto">{action}</div>}
