@@ -571,6 +571,12 @@ header.app-header {
     outline: 2px solid var(--brand-accent);
     outline-offset: 2px;
   }
+  /* Header buttons already have their own border: a gap + second ring around them looks like a double frame.
+     Keep the ring (keyboard users need it) but hug the border and soften it. */
+  .app-header :focus-visible {
+    outline: 1.5px solid color-mix(in srgb, var(--brand-accent) 75%, transparent);
+    outline-offset: 0;
+  }
 }
 
 /* Menus show the current item with a soft fill (pointer and keyboard), not an outline */

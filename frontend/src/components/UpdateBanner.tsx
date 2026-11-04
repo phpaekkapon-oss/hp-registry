@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { RefreshCw, X } from 'lucide-react';
+import { subscribeLive } from '../features/procure/live';
 
 interface DeployedVersion {
   version: string;
   build: string;
 }
 
-const CHECK_EVERY_MS = 5 * 60 * 1000;
+const CHECK_EVERY_MS = 60 * 1000;
 
 async function fetchDeployed(): Promise<DeployedVersion | null> {
   try {
@@ -41,10 +42,18 @@ export const UpdateBanner: React.FC = () => {
     void check();
     const timer = setInterval(() => void check(), CHECK_EVERY_MS);
     document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('online', onVisible);
+    // A deploy restarts the server: the live stream drops and reconnects a few seconds later, and on reconnect it asks
+    // every screen to reload (resource "*"). That is the moment the new build is ready, so look right then.
+    const off = subscribeLive((e) => {
+      if (e.resource === '*') void check();
+    });
     return () => {
       cancelled = true;
       clearInterval(timer);
       document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('online', onVisible);
+      off();
     };
   }, []);
 
