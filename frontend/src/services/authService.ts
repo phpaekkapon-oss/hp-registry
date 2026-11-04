@@ -3,7 +3,7 @@
  * The browser never sees the session id: it lives in an HttpOnly cookie.
  */
 import type { EnterpriseRole } from './enterpriseService';
-import { apiFetch } from './apiClient';
+import { apiFetch, resolveApiUrl } from './apiClient';
 
 export interface AuthUser {
   username: string;
@@ -101,7 +101,7 @@ export const authService = {
   /** @returns the session, `null` if there is no session, `undefined` if the server cannot be reached */
   async me(): Promise<SessionInfo | null | undefined> {
     try {
-      const res = await fetch('/api/auth/me');
+      const res = await fetch(resolveApiUrl('/api/auth/me'));
       if (res.status === 401) return null;
       if (!res.ok) return undefined;
       return (await res.json()).data as SessionInfo;
@@ -112,7 +112,7 @@ export const authService = {
 
   async login(username: string, password: string): Promise<LoginResult> {
     try {
-      return await readLogin(await fetch('/api/auth/login', json({ username, password })));
+      return await readLogin(await fetch(resolveApiUrl('/api/auth/login'), json({ username, password })));
     } catch {
       return UNREACHABLE;
     }
@@ -121,7 +121,7 @@ export const authService = {
   /** Second step for accounts protected by Google Authenticator */
   async loginTotp(ticket: string, code: string, remember = false): Promise<LoginResult & { expired?: boolean }> {
     try {
-      const res = await fetch('/api/auth/login/totp', json({ ticket, code, remember }));
+      const res = await fetch(resolveApiUrl('/api/auth/login/totp'), json({ ticket, code, remember }));
       const result = await readLogin(res.clone());
       if (result.ok) return result;
       const body = await res.json().catch(() => ({}));
@@ -134,7 +134,7 @@ export const authService = {
   /** Sign-in buttons the admin has switched on (ThaID, Provider ID) and how long a browser may be remembered after 2FA */
   async publicConfig(): Promise<{ providers: ProviderButton[]; trustDeviceDays: number }> {
     try {
-      const res = await fetch('/api/auth/config');
+      const res = await fetch(resolveApiUrl('/api/auth/config'));
       if (!res.ok) return { providers: [], trustDeviceDays: 0 };
       const d = (await res.json()).data;
       return { providers: (d.providers ?? []) as ProviderButton[], trustDeviceDays: Number(d.trustDeviceDays ?? 0) };
@@ -145,7 +145,7 @@ export const authService = {
 
   async logout(): Promise<void> {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch(resolveApiUrl('/api/auth/logout'), { method: 'POST' });
     } catch {
       // The server session will expire on its own; local state is cleared regardless
     }
@@ -162,7 +162,7 @@ export const authService = {
   /** @returns null when unlocked, otherwise the message to show (`ended` = too many wrong PINs, the session is gone) */
   async unlock(pin: string): Promise<{ ok: true } | { ok: false; message: string; ended?: boolean }> {
     try {
-      const res = await fetch('/api/auth/unlock', json({ pin }));
+      const res = await fetch(resolveApiUrl('/api/auth/unlock'), json({ pin }));
       if (res.ok) return { ok: true };
       const body = await res.json().catch(() => ({}));
       return { ok: false, message: body.message ?? 'ปลดล็อกไม่สำเร็จ', ended: res.status === 401 && body.code === 'UNAUTHENTICATED' };

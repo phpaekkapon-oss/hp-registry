@@ -2,6 +2,7 @@ import { useLiveStatus } from '../features/procure/live';
 import { useNotifications, timeAgo } from '../features/audit/useNotifications';
 import React, { useEffect, useRef, useState } from 'react';
 import { InstallHelpDialog } from '../components/InstallHelpDialog';
+import { VersionBadge } from '../components/VersionBadge';
 import { SecurityDialog } from '../features/auth/SecurityDialog';
 import { useAuth } from '../features/auth/AuthContext';
 import { useInstallApp } from '../services/pwa';
@@ -37,10 +38,6 @@ import {
   LogOut,
   Download,
   RotateCcw,
-  Square,
-  SquareDashed,
-  Layers,
-  Gem,
   PanelLeft,
 } from 'lucide-react';
 import {
@@ -49,7 +46,7 @@ import {
   RBAC_MATRIX,
 } from '../services/enterpriseService';
 import { GOVERNMENT_THEMES, ThemeColorConfig } from '../services/themeService';
-import { DEFAULT_SIDEBAR_STYLE, SIDEBAR_STYLES, type SidebarStyle } from '../services/sidebarStyle';
+import { DEFAULT_SIDEBAR_STYLE, SIDEBAR_STYLES, sidebarPreviewBackground, type SidebarStyle } from '../services/sidebarStyle';
 import { SyncEngineStatus } from '../components/compound/EnterprisePrimitives';
 
 interface HeaderProps {
@@ -226,14 +223,14 @@ export const Header: React.FC<HeaderProps> = ({
   const permissions = RBAC_MATRIX[currentRole];
 
   return (
-    <header className="app-header pt-safe px-safe bg-white/85 dark:bg-slate-900/85 border-b border-slate-200 dark:border-slate-800 shrink-0">
+    <header className="app-header pt-safe px-safe bg-white/85 dark:bg-slate-900/85 border-b border-slate-200 dark:border-[var(--token-border-subtle)] shrink-0">
       <div className="flex items-center justify-between gap-2 sm:gap-4 px-4 sm:px-6 h-16">
         {/* Zone 1: Mobile Menu Trigger + Official Department Title */}
         <div className="flex items-center gap-2 min-w-0">
           <button
             type="button"
             onClick={onOpenMobileMenu}
-            className="flex lg:hidden items-center justify-center min-w-[48px] min-h-[48px] -ml-2 rounded-lg text-ink-4 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+            className="flex lg:hidden items-center justify-center min-w-[48px] min-h-[48px] -ml-2 rounded-lg text-ink-4 hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)] transition-colors cursor-pointer shrink-0"
             aria-label="เปิดเมนูนำทาง"
           >
             <Menu className="w-5 h-5" />
@@ -248,7 +245,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={onToggleSidebar}
                   aria-label={isSidebarCollapsed ? 'ขยายแถบเมนู' : 'ย่อแถบเมนู'}
                   aria-pressed={isSidebarCollapsed}
-                  className="hidden lg:inline-flex items-center justify-center w-10 h-10 -ml-1 rounded-lg text-ink-4 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+                  className="hidden lg:inline-flex items-center justify-center w-10 h-10 -ml-1 rounded-lg text-ink-4 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)] transition-colors cursor-pointer shrink-0"
                 >
                   {isSidebarCollapsed ? (
                     <PanelLeftOpen className="w-5 h-5" />
@@ -270,7 +267,7 @@ export const Header: React.FC<HeaderProps> = ({
               </Tooltip.Portal>
             </Tooltip.Root>
           </Tooltip.Provider>
-          <span className="hidden lg:block w-px h-6 bg-slate-200 dark:bg-slate-700 mr-1" aria-hidden="true" />
+          <span className="hidden lg:block w-px h-6 bg-slate-200 dark:bg-[var(--token-border-subtle)] mr-1" aria-hidden="true" />
 
           <div className="flex items-center gap-2 text-sm min-w-0">
             <span className="hidden xl:inline text-ink-3 whitespace-nowrap text-sm font-medium">
@@ -297,10 +294,10 @@ export const Header: React.FC<HeaderProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาเลขบัตรประชาชน, HN, ชื่อ-สกุล, แผนก..."
               aria-label="ค้นหาเลขบัตรประชาชน, HN, ชื่อ-สกุล, แผนก"
-              className="w-full min-h-[44px] pl-10 pr-10 lg:pr-20 py-2 text-xs text-ellipsis bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-lg text-ink placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-slate-400 transition-colors"
+              className="w-full min-h-[44px] pl-10 pr-10 lg:pr-20 py-2 text-xs text-ellipsis bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-[var(--token-border-subtle)] rounded-lg text-ink placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-slate-400 transition-colors"
             />
             {!searchQuery && (
-              <kbd className="hidden lg:inline-flex absolute right-3 items-center gap-0.5 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 text-xs font-semibold text-ink-5 pointer-events-none">
+              <kbd className="hidden lg:inline-flex absolute right-3 items-center gap-0.5 px-1.5 py-0.5 rounded border border-slate-200 dark:border-[var(--token-border-subtle)] text-xs font-semibold text-ink-5 pointer-events-none">
                 Ctrl K
               </kbd>
             )}
@@ -324,10 +321,14 @@ export const Header: React.FC<HeaderProps> = ({
             type="button"
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
             aria-label="เปิดหรือปิดช่องค้นหา"
-            className={`${SHOW_DEMO_MODULES ? 'flex sm:hidden' : 'hidden'} items-center justify-center min-w-[48px] min-h-[48px] rounded-lg text-ink-4 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer`}
+            className={`${SHOW_DEMO_MODULES ? 'flex sm:hidden' : 'hidden'} items-center justify-center min-w-[48px] min-h-[48px] rounded-lg text-ink-4 hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)] transition-colors cursor-pointer`}
           >
             {mobileSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
           </button>
+
+          <div className="hidden sm:flex items-center">
+            <VersionBadge announce />
+          </div>
 
           {/* Real connection status (not a button: nothing to simulate) */}
           <div
@@ -366,9 +367,9 @@ export const Header: React.FC<HeaderProps> = ({
             }
             className={`${SHOW_DEMO_MODULES ? 'hidden md:inline-flex' : 'hidden'} items-center justify-center gap-1.5 min-h-[48px] min-w-[48px] px-3 py-2 rounded-lg border text-xs font-semibold transition-colors whitespace-nowrap ${
               !permissions.canViewUnmaskedPII
-                ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 cursor-not-allowed'
+                ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-[var(--token-border-subtle)] text-slate-400 cursor-not-allowed'
                 : isDataMasked
-                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-ink-3 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer'
+                ? 'bg-white dark:bg-[var(--token-surface-card)] border-slate-200 dark:border-[var(--token-border-subtle)] text-ink-3 hover:bg-slate-50 dark:hover:bg-[var(--token-surface-elevated)] cursor-pointer'
                 : 'btn-brand border-transparent cursor-pointer'
             }`}
           >
@@ -381,7 +382,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
 
-          <span className="hidden md:block w-px h-7 bg-slate-200 dark:bg-slate-700 mx-0.5" aria-hidden="true" />
+          <span className="hidden md:block w-px h-7 bg-slate-200 dark:bg-[var(--token-border-subtle)] mx-0.5" aria-hidden="true" />
 
           {/* 16-Color Official Theme Picker Popover */}
           <Popover.Root>
@@ -390,7 +391,7 @@ export const Header: React.FC<HeaderProps> = ({
                 type="button"
                 aria-label="เปลี่ยนสีธีมและรูปแบบแถบเมนู"
                 title={`ธีม: ${activeTheme.thaiName} (คลิกเพื่อเปลี่ยนสีและรูปแบบแถบเมนู)`}
-                className="min-w-[48px] min-h-[48px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 hidden sm:inline-flex items-center justify-center transition-colors cursor-pointer"
+                className="min-w-[48px] min-h-[48px] rounded-lg border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] hover:bg-slate-50 dark:hover:bg-[var(--token-surface-elevated)] hidden sm:inline-flex items-center justify-center transition-colors cursor-pointer"
               >
                 <Palette className="w-5 h-5" style={{ color: activeTheme.hex }} aria-hidden="true" />
               </button>
@@ -399,7 +400,7 @@ export const Header: React.FC<HeaderProps> = ({
               <Popover.Content
                 align="end"
                 sideOffset={8}
-                className="z-50 w-[24rem] max-w-[calc(100vw-1.5rem)] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-xl"
+                className="z-50 w-[24rem] max-w-[calc(100vw-1.5rem)] rounded-2xl border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] p-4 shadow-xl"
               >
                 <div className="flex items-center gap-2.5">
                   <span className="h-3.5 w-3.5 shrink-0 rounded-full ring-2 ring-white/70 dark:ring-white/20" style={{ backgroundColor: activeTheme.hex }} aria-hidden="true" />
@@ -407,7 +408,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <button
                     type="button"
                     onClick={() => onResetAppearance?.()}
-                    className="ml-auto inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
+                    className="ml-auto inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/25 dark:text-slate-100 dark:hover:border-white/40 dark:hover:bg-white/10 cursor-pointer"
                   >
                     <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" /> ค่ามาตรฐาน
                   </button>
@@ -436,18 +437,20 @@ export const Header: React.FC<HeaderProps> = ({
                     );
                   })}
                 </div>
-                <p className="mt-2.5 text-xs font-semibold" style={{ color: activeTheme.hex }}>
-                  {activeTheme.thaiName} <span className="font-normal text-ink-5">— สีปัจจุบัน</span>
+                <p className="mt-3 flex items-center gap-2 text-sm font-bold text-ink">
+                  <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: activeTheme.hex }} aria-hidden="true" />
+                  {activeTheme.thaiName}
+                  <span className="text-xs font-normal text-ink-5">สีปัจจุบัน</span>
                 </p>
 
-                <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+                <div className="mt-3 border-t border-slate-100 pt-3 dark:border-white/10">
                   <p className="flex items-center gap-2 text-sm font-bold text-ink">
                     <PanelLeft className="w-4 h-4" aria-hidden="true" /> สไตล์แถบเมนูด้านข้าง
                   </p>
                   <div role="radiogroup" aria-label="สไตล์แถบเมนูด้านข้าง" className="mt-2.5 grid grid-cols-5 gap-2">
                     {SIDEBAR_STYLES.map((st) => {
                       const on = sidebarStyle === st.id;
-                      const Icon = { clean: Square, tint: SquareDashed, gradient: Layers, premium: Gem, solid: PanelLeft }[st.id];
+                      const slab = sidebarPreviewBackground(st.id, activeTheme.hex, isDarkMode);
                       return (
                         <button
                           key={st.id}
@@ -457,21 +460,27 @@ export const Header: React.FC<HeaderProps> = ({
                           onClick={() => onSelectSidebarStyle?.(st.id)}
                           title={st.hint}
                           className={`flex min-h-[68px] flex-col items-center justify-center gap-1.5 rounded-xl border px-1 py-2 text-xs font-semibold transition-colors cursor-pointer ${
-                            on ? 'text-ink' : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+                            on ? 'text-ink' : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:border-white/25 dark:hover:bg-white/[0.08]'
                           }`}
                           style={on ? { borderColor: activeTheme.hex, backgroundColor: `color-mix(in srgb, ${activeTheme.hex} 14%, transparent)`, boxShadow: `0 0 0 1px ${activeTheme.hex}` } : undefined}
                         >
-                          <Icon className="w-5 h-5" style={on ? { color: activeTheme.hex } : undefined} aria-hidden="true" />
+                          <span className="flex h-7 w-12 overflow-hidden rounded-md border border-slate-300 bg-slate-200 dark:border-white/20 dark:bg-white/10" aria-hidden="true">
+                            <span className="w-4 border-r border-black/10 dark:border-white/10" style={{ background: slab }} />
+                            <span className="flex flex-1 flex-col justify-center gap-1 px-1.5">
+                              <span className="h-0.5 w-full rounded-full bg-slate-400/70 dark:bg-white/25" />
+                              <span className="h-0.5 w-2/3 rounded-full bg-slate-400/70 dark:bg-white/25" />
+                            </span>
+                          </span>
                           {st.label}
                         </button>
                       );
                     })}
                   </div>
                   <p className="mt-2.5 text-xs text-ink-4">
-                    ✓ {SIDEBAR_STYLES.find((st) => st.id === sidebarStyle)?.hint}
+                    {SIDEBAR_STYLES.find((st) => st.id === sidebarStyle)?.hint}
                   </p>
                 </div>
-                <p className="mt-2 text-xs text-ink-5">มีผลกับทั้งระบบและบันทึกอัตโนมัติบนเครื่องนี้</p>
+                <p className="mt-2.5 border-t border-slate-100 pt-2.5 text-xs text-ink-5 dark:border-white/10">มีผลกับทั้งระบบ · บันทึกอัตโนมัติบนเครื่องนี้</p>
               </Popover.Content>
             </Popover.Portal>
           </Popover.Root>
@@ -490,11 +499,11 @@ export const Header: React.FC<HeaderProps> = ({
                 type="button"
                 aria-label="การแจ้งเตือน"
                 title="การแจ้งเตือน"
-                className="relative min-w-[48px] min-h-[48px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 inline-flex items-center justify-center text-ink-3 transition-colors cursor-pointer"
+                className="relative min-w-[48px] min-h-[48px] rounded-lg border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] hover:bg-slate-50 dark:hover:bg-[var(--token-surface-elevated)] inline-flex items-center justify-center text-ink-3 transition-colors cursor-pointer"
               >
                 <Bell className="w-4 h-4" />
                 {alertCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-xs font-bold inline-flex items-center justify-center ring-2 ring-white dark:ring-slate-900">
+                  <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-xs font-bold inline-flex items-center justify-center ring-2 ring-white dark:ring-[var(--token-surface-card)]">
                     {alertCount > 9 ? '9+' : alertCount}
                   </span>
                 )}
@@ -504,9 +513,9 @@ export const Header: React.FC<HeaderProps> = ({
               <Popover.Content
                 align="end"
                 sideOffset={8}
-                className="z-50 w-80 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 shadow-lg"
+                className="z-50 w-80 rounded-xl border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] p-3 shadow-lg"
               >
-                <div className="flex items-center justify-between gap-2 px-1 pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between gap-2 px-1 pb-2 mb-2 border-b border-slate-100 dark:border-[var(--token-border-subtle)]">
                   <p className="text-sm font-bold text-ink">การแจ้งเตือน</p>
                   {(bell?.unread ?? 0) > 0 && (
                     <button type="button" onClick={() => void markRead()} className="text-xs font-semibold underline cursor-pointer">
@@ -597,7 +606,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={handleToggleFullscreen}
             aria-label={isFullscreen ? 'ออกจากโหมดเต็มจอ' : 'เปิดโหมดเต็มจอ'}
             title={isFullscreen ? 'ออกจากโหมดเต็มจอ (Esc)' : 'เปิดโหมดเต็มจอ'}
-            className="hidden sm:inline-flex min-w-[48px] min-h-[48px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 items-center justify-center text-ink-3 transition-colors cursor-pointer"
+            className="hidden sm:inline-flex min-w-[48px] min-h-[48px] rounded-lg border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] hover:bg-slate-50 dark:hover:bg-[var(--token-surface-elevated)] items-center justify-center text-ink-3 transition-colors cursor-pointer"
           >
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
           </button>
@@ -608,7 +617,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onToggleDarkMode}
             aria-label={isDarkMode ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด'}
             title={isDarkMode ? 'โหมดสว่าง' : 'โหมดมืด'}
-            className="hidden sm:inline-flex min-w-[48px] min-h-[48px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 items-center justify-center text-ink-3 transition-colors cursor-pointer"
+            className="hidden sm:inline-flex min-w-[48px] min-h-[48px] rounded-lg border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] hover:bg-slate-50 dark:hover:bg-[var(--token-surface-elevated)] items-center justify-center text-ink-3 transition-colors cursor-pointer"
           >
             {isDarkMode ? (
               <Sun className="w-4 h-4 text-amber-400" />
@@ -617,14 +626,14 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
 
-          <span className="hidden md:block w-px h-7 bg-slate-200 dark:bg-slate-700 mx-0.5" aria-hidden="true" />
+          <span className="hidden md:block w-px h-7 bg-slate-200 dark:bg-[var(--token-border-subtle)] mx-0.5" aria-hidden="true" />
 
           {/* Officer Profile & RBAC Role Switcher Dropdown */}
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <button
                 type="button"
-                className="relative flex items-center justify-center sm:justify-start gap-2 min-h-[48px] min-w-[48px] px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                className="relative flex items-center justify-center sm:justify-start gap-2 min-h-[48px] min-w-[48px] px-2.5 py-1 rounded-lg border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] hover:bg-slate-50 dark:hover:bg-[var(--token-surface-elevated)] transition-colors cursor-pointer"
                 aria-label="เมนูบัญชีผู้ใช้"
               >
                 <UserAvatar name={user.displayName} className="h-8 w-8 rounded-md text-xs font-bold" />
@@ -638,7 +647,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
                 <span
-                  className={`sm:hidden absolute top-1 right-1 w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-slate-900 ${
+                  className={`sm:hidden absolute top-1 right-1 w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-[var(--token-surface-card)] ${
                     !isOnline ? 'bg-amber-500' : syncStatus === 'syncing' ? 'bg-sky-500' : 'bg-emerald-500'
                   }`}
                   aria-hidden="true"
@@ -650,7 +659,7 @@ export const Header: React.FC<HeaderProps> = ({
               <DropdownMenu.Content
                 align="end"
                 sideOffset={8}
-                className="z-50 min-w-[260px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-ink shadow-lg"
+                className="z-50 min-w-[260px] rounded-xl border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] p-2 text-ink shadow-lg"
               >
                 <DropdownMenu.Label className="px-3 py-3">
                   <div className="flex items-center gap-3">
@@ -673,7 +682,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <DropdownMenu.Item
                   onSelect={() => setSecurityOpen(true)}
                   aria-label="เปิดโปรไฟล์และความปลอดภัย"
-                  className="mx-1 mb-1 flex flex-wrap gap-1.5 rounded-lg px-2 py-1.5 outline-none cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="mx-1 mb-1 flex flex-wrap gap-1.5 rounded-lg px-2 py-1.5 outline-none cursor-pointer hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)]"
                 >
                   {[
                     { on: security.totpEnabled, label: `2FA: ${security.totpEnabled ? 'เปิดใช้งาน' : 'ยังไม่เปิด'}`, Icon: ShieldCheck },
@@ -694,7 +703,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </DropdownMenu.Item>
 
                 <div className="sm:hidden">
-                  <DropdownMenu.Separator className="my-1.5 h-px bg-slate-100 dark:bg-slate-800" />
+                  <DropdownMenu.Separator className="my-1.5 h-px bg-slate-100 dark:bg-[var(--token-border-subtle)]" />
                   <p className="px-3 py-1.5 text-xs text-ink-4">
                     สถานะ:{' '}
                     <strong className="font-semibold text-ink">
@@ -732,18 +741,18 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                   <DropdownMenu.Item
                     onSelect={onToggleDarkMode}
-                    className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                    className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)] cursor-pointer"
                   >
                     {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-500" />}
                     <span>{isDarkMode ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด'}</span>
                   </DropdownMenu.Item>
                 </div>
 
-                <DropdownMenu.Separator className="my-1.5 h-px bg-slate-100 dark:bg-slate-800" />
+                <DropdownMenu.Separator className="my-1.5 h-px bg-slate-100 dark:bg-[var(--token-border-subtle)]" />
 
                 <DropdownMenu.Item
                   onSelect={onToggleDataMask}
-                  className="min-h-[48px] flex items-center justify-between gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                  className="min-h-[48px] flex items-center justify-between gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)] cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <Shield className="w-4 h-4 text-slate-500" />
@@ -756,7 +765,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                 <DropdownMenu.Item
                   onSelect={onSelectSettings}
-                  className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                  className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)] cursor-pointer"
                 >
                   <UserCheck className="w-4 h-4 text-slate-500" />
                   <span>ตั้งค่าระบบ</span>
@@ -764,7 +773,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {installApp.canInstall ? (
                   <DropdownMenu.Item
                     onSelect={() => void installApp.install()}
-                    className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                    className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)] cursor-pointer"
                   >
                     <Download className="w-4 h-4 text-slate-500" />
                     <span>ติดตั้งแอปบนอุปกรณ์นี้</span>
@@ -773,7 +782,7 @@ export const Header: React.FC<HeaderProps> = ({
                   !installApp.installed && (
                     <DropdownMenu.Item
                       onSelect={() => setInstallHelpOpen(true)}
-                      className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                      className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)] cursor-pointer"
                     >
                       <Download className="w-4 h-4 text-slate-500" />
                       <span>วิธีติดตั้งเป็นแอป</span>
@@ -781,11 +790,11 @@ export const Header: React.FC<HeaderProps> = ({
                   )
                 )}
 
-                <DropdownMenu.Separator className="my-1.5 h-px bg-slate-100 dark:bg-slate-800" />
+                <DropdownMenu.Separator className="my-1.5 h-px bg-slate-100 dark:bg-[var(--token-border-subtle)]" />
                 {security.hasPin && (
                   <DropdownMenu.Item
                     onSelect={() => void lock()}
-                    className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                    className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)] cursor-pointer"
                   >
                     <LockKeyhole className="w-4 h-4 text-amber-500" />
                     <span>ล็อกหน้าจอทันที</span>
@@ -793,7 +802,7 @@ export const Header: React.FC<HeaderProps> = ({
                 )}
                 <DropdownMenu.Item
                   onSelect={() => setSecurityOpen(true)}
-                  className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                  className="min-h-[48px] flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium rounded-lg outline-none hover:bg-slate-100 dark:hover:bg-[var(--token-surface-elevated)] cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
                   <span>โปรไฟล์ &amp; ความปลอดภัย (รูป, 2FA, PIN)</span>
@@ -813,7 +822,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Expandable Mobile Search Drawer Row */}
       {SHOW_DEMO_MODULES && mobileSearchOpen && (
-        <div className="sm:hidden px-3 pb-3 border-t border-slate-100 dark:border-slate-800">
+        <div className="sm:hidden px-3 pb-3 border-t border-slate-100 dark:border-[var(--token-border-subtle)]">
           <div className="relative flex items-center mt-2">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
             <input
@@ -822,7 +831,7 @@ export const Header: React.FC<HeaderProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาเลขบัตรประชาชน, HN, ชื่อ-สกุล..."
-              className="w-full min-h-[48px] pl-10 pr-12 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-ink"
+              className="w-full min-h-[48px] pl-10 pr-12 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-[var(--token-border-subtle)] rounded-lg text-ink"
             />
             {searchQuery && (
               <button

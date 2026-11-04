@@ -3,6 +3,19 @@
  * จัดการเรียกข้อมูลจากหลังบ้าน (Node.js Express) พร้อมระบบ Offline Fallback
  */
 
+export const API_BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') + '/api';
+
+/** แปลงพาธ /api/... ให้มี prefix ตาม base path ของแอป เช่น /hp-registry/api/... เมื่ออยู่บนเซิร์ฟเวอร์ */
+export function resolveApiUrl(path: string): string {
+  if (path.startsWith('/api/')) {
+    return API_BASE + path.slice(4);
+  }
+  if (path === '/api') {
+    return API_BASE;
+  }
+  return path;
+}
+
 export interface BackendHealth {
   status: string;
   mode: string;
@@ -32,7 +45,8 @@ export function setSetup2faHandler(handler: (() => void) | null): void {
 
 /** fetch() for authenticated API calls: a 401 means the session is gone, a 423 that the screen is locked */
 export async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
-  const res = await fetch(input, init);
+  const url = resolveApiUrl(input);
+  const res = await fetch(url, init);
   if (res.status === 401) onUnauthorized?.();
   if (res.status === 423) onLocked?.();
   if (res.status === 428) onSetup2fa?.();
@@ -45,7 +59,7 @@ export const apiClient = {
    */
   async checkHealth(): Promise<BackendHealth | null> {
     try {
-      const res = await fetch('/api/health');
+      const res = await fetch(resolveApiUrl('/api/health'));
       if (!res.ok) return null;
       return await res.json();
     } catch {

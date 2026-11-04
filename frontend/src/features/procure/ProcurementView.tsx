@@ -326,7 +326,7 @@ export const ProcurementView: React.FC<{ currentRole: EnterpriseRole; menus: str
   return (
     <div className="space-y-5">
       {/* Executive Government Header Card */}
-      <div className="rounded-2xl border border-slate-200/90 bg-white/80 p-4 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-slate-900/70 sm:p-5">
+      <div className="rounded-2xl border border-slate-200/90 bg-white/80 p-4 shadow-xs backdrop-blur-md dark:border-[var(--token-border-subtle)] dark:bg-[var(--token-surface-card)] sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           {/* Left: Title & System Status */}
           <div className="min-w-0 space-y-1.5">
@@ -387,7 +387,7 @@ export const ProcurementView: React.FC<{ currentRole: EnterpriseRole; menus: str
                 className={`min-h-[32px] rounded-lg px-3 text-xs font-semibold transition-all cursor-pointer ${
                   mode === 'fiscal'
                     ? 'bg-white text-slate-950 shadow-xs ring-1 ring-slate-200 dark:bg-[var(--pf-surface)] dark:text-white dark:ring-white/15'
-                    : 'text-slate-600 hover:text-ink dark:hover:text-white'
+                    : 'text-slate-600 hover:text-ink dark:text-slate-300 dark:hover:text-white'
                 }`}
                 title="ปีงบประมาณ (ต.ค.–ก.ย.)"
               >
@@ -399,7 +399,7 @@ export const ProcurementView: React.FC<{ currentRole: EnterpriseRole; menus: str
                 className={`min-h-[32px] rounded-lg px-3 text-xs font-semibold transition-all cursor-pointer ${
                   mode === 'calendar'
                     ? 'bg-white text-slate-950 shadow-xs ring-1 ring-slate-200 dark:bg-[var(--pf-surface)] dark:text-white dark:ring-white/15'
-                    : 'text-slate-600 hover:text-ink dark:hover:text-white'
+                    : 'text-slate-600 hover:text-ink dark:text-slate-300 dark:hover:text-white'
                 }`}
                 title="ปีปฏิทิน (ม.ค.–ธ.ค.)"
               >
@@ -408,7 +408,7 @@ export const ProcurementView: React.FC<{ currentRole: EnterpriseRole; menus: str
             </div>
 
             {/* Year Dropdown */}
-            <div className="w-[140px]">
+            <div className="w-[12rem] shrink-0">
               <Select
                 id="procure-fy"
                 value={String(fy)}

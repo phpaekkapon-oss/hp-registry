@@ -37,7 +37,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     return (
       <nav
         aria-label="เมนูนำทางสำหรับมือถือ"
-        className="gpu-accelerated font-prompt fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pb-safe px-safe"
+        className="gpu-accelerated font-prompt fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 dark:bg-[color-mix(in_srgb,var(--token-surface-chrome)_95%,transparent)] backdrop-blur-md border-t border-slate-200 dark:border-[var(--token-border-subtle)] pb-safe px-safe"
       >
         <div className="grid grid-cols-3 items-center h-16 max-w-lg mx-auto px-1">
           {tabs.map((tab) => (
@@ -62,7 +62,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   return (
     <nav
       aria-label="เมนูนำทางสำหรับมือถือ"
-      className="gpu-accelerated font-prompt fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pb-safe px-safe"
+      className="gpu-accelerated font-prompt fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 dark:bg-[color-mix(in_srgb,var(--token-surface-chrome)_95%,transparent)] backdrop-blur-md border-t border-slate-200 dark:border-[var(--token-border-subtle)] pb-safe px-safe"
     >
       <div className="grid grid-cols-5 items-center h-16 max-w-lg mx-auto px-1">
         {/* Tab 1: Overview */}

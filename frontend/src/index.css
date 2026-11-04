@@ -14,81 +14,100 @@
 }
 
 /* ============================================================================
-   Typography: ONE family (Sarabun), THREE weights (400 / 500 / 600).
+   Typography: UI = Noto Sans Thai (ONE family, THREE weights 400 / 500 / 600).
+   Documents (print / official forms) = TH Sarabun New via .font-doc.
    Hierarchy comes from size and weight, never from switching typefaces.
-   Files are local .woff2 so the app stays fully offline-ready.
+   Files are local so the app stays fully offline-ready.
    ============================================================================ */
 
-/* Sarabun 400 */
+/* Noto Sans Thai 400 */
 @font-face {
-  font-family: 'Sarabun';
+  font-family: 'Noto Sans Thai';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/Sarabun-Regular.woff2') format('woff2');
+  src: url('/fonts/NotoSansThai-Regular.woff2') format('woff2');
   unicode-range: U+0E01-0E5B, U+200C-200D, U+25CC;
 }
 @font-face {
-  font-family: 'Sarabun';
+  font-family: 'Noto Sans Thai';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/Sarabun-Latin-Regular.woff2') format('woff2');
+  src: url('/fonts/NotoSansThai-Latin-Regular.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* Sarabun 500 */
+/* Noto Sans Thai 500 */
 @font-face {
-  font-family: 'Sarabun';
+  font-family: 'Noto Sans Thai';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/Sarabun-Medium.woff2') format('woff2');
+  src: url('/fonts/NotoSansThai-Medium.woff2') format('woff2');
   unicode-range: U+0E01-0E5B, U+200C-200D, U+25CC;
 }
 @font-face {
-  font-family: 'Sarabun';
+  font-family: 'Noto Sans Thai';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/Sarabun-Latin-Medium.woff2') format('woff2');
+  src: url('/fonts/NotoSansThai-Latin-Medium.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* Sarabun 600 */
+/* Noto Sans Thai 600 */
 @font-face {
-  font-family: 'Sarabun';
+  font-family: 'Noto Sans Thai';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/Sarabun-SemiBold.woff2') format('woff2');
+  src: url('/fonts/NotoSansThai-SemiBold.woff2') format('woff2');
   unicode-range: U+0E01-0E5B, U+200C-200D, U+25CC;
 }
 @font-face {
-  font-family: 'Sarabun';
+  font-family: 'Noto Sans Thai';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/Sarabun-Latin-SemiBold.woff2') format('woff2');
+  src: url('/fonts/NotoSansThai-Latin-SemiBold.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* TH Sarabun New: official-document face (regular + bold) */
+@font-face {
+  font-family: 'TH Sarabun New';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('TH Sarabun New'), local('THSarabunNew'), url('/fonts/THSarabunNew-Regular.woff') format('woff'), url('/fonts/THSarabunNew-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'TH Sarabun New';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('TH Sarabun New Bold'), local('THSarabunNew-Bold'), url('/fonts/THSarabunNew-Bold.woff') format('woff'), url('/fonts/THSarabunNew-Bold.ttf') format('truetype');
 }
 
 /* Metric-matched fallback avoids layout shift while the .woff2 loads */
 @font-face {
-  font-family: 'Sarabun Fallback';
+  font-family: 'Noto Sans Thai Fallback';
   src: local('Segoe UI'), local('Tahoma'), local('Arial');
-  ascent-override: 98.0%;
-  descent-override: 29.5%;
+  ascent-override: 106.0%;
+  descent-override: 29.0%;
   line-gap-override: 0.0%;
   size-adjust: 100.0%;
 }
 
 @layer base {
   :root {
-    --font-sarabun: 'Sarabun', 'Sarabun Fallback', 'Segoe UI', Tahoma, sans-serif;
-    --font-prompt: var(--font-sarabun);
-    --font-sans: var(--font-sarabun);
-    --font-mono: var(--font-sarabun);
+    --font-ui: 'Noto Sans Thai', 'Noto Sans Thai Fallback', 'Segoe UI', Tahoma, sans-serif;
+    --font-doc: 'TH Sarabun New', 'Sarabun', Tahoma, sans-serif;
+    --font-sarabun: var(--font-ui);
+    --font-prompt: var(--font-ui);
+    --font-sans: var(--font-ui);
+    --font-mono: var(--font-ui);
 
     /* Enterprise Design Tokens: 16-Color Dynamic Theme Engine */
     --brand-primary: #1E3A8A;
@@ -100,8 +119,8 @@
     --chart-grid: rgba(203, 213, 225, 0.5);
     --brand-chart: var(--brand-primary);
     --token-surface-chrome: #FFFFFF;
-    --brand-strong: color-mix(in srgb, var(--brand-primary) 80%, #000);
-    --brand-strong-hover: color-mix(in srgb, var(--brand-primary) 66%, #000);
+    --brand-strong: color-mix(in srgb, var(--brand-primary) 86%, #000);
+    --brand-strong-hover: color-mix(in srgb, var(--brand-primary) 72%, #000);
     --brand-accent: var(--brand-strong);
     --token-brand-primary: var(--brand-primary);
     --token-brand-hover: var(--brand-primary-hover);
@@ -163,12 +182,12 @@
     --brand-accent: color-mix(in srgb, var(--brand-primary) 45%, #fff);
     --brand-soft-bg: color-mix(in srgb, var(--brand-primary) 20%, #0F172A);
     /* Enterprise Million-Dollar Secret: Chroma-Shifted Dark Neutrals & Optical Specular Rim */
-    --token-surface-canvas: color-mix(in srgb, var(--brand-primary) 4%, #080C14);
-    --token-surface-chrome: color-mix(in srgb, var(--brand-primary) 5%, #0D1424);
-    --token-surface-card: color-mix(in srgb, var(--brand-primary) 6%, #131C2E);
-    --token-surface-elevated: color-mix(in srgb, var(--brand-primary) 9%, #1C2740);
-    --token-border-subtle: color-mix(in srgb, var(--brand-primary) 12%, #26324A);
-    --token-border-optical: color-mix(in srgb, var(--brand-primary) 24%, #3A4862);
+    --token-surface-canvas: color-mix(in srgb, var(--brand-primary) 10%, #0C1322);
+    --token-surface-chrome: color-mix(in srgb, var(--brand-primary) 10%, #0D1424);
+    --token-surface-card: color-mix(in srgb, var(--brand-primary) 13%, #18233A);
+    --token-surface-elevated: color-mix(in srgb, var(--brand-primary) 17%, #212E4C);
+    --token-border-subtle: color-mix(in srgb, var(--brand-primary) 22%, #2D3A56);
+    --token-border-optical: color-mix(in srgb, var(--brand-primary) 32%, #3A4862);
 
     /* Semantic text ramp, dark: lifted so the same roles stay readable on dark surfaces */
     --text-ink: #FFFFFF;
@@ -667,18 +686,24 @@ header.app-header {
   display: none;
 }
 
+/* Official-document surfaces (on screen and on paper) */
+.font-doc,
+.font-doc * {
+  font-family: var(--font-doc) !important;
+}
+
 @page {
   size: A4 portrait;
   margin: 14mm 12mm 18mm;
   @bottom-left {
     content: 'เอกสารใช้ภายในหน่วยงาน · มีข้อมูลส่วนบุคคลตาม PDPA';
-    font-family: 'Sarabun', sans-serif;
+    font-family: var(--font-doc);
     font-size: 9pt;
     color: #64748b;
   }
   @bottom-right {
     content: 'หน้า ' counter(page) ' / ' counter(pages);
-    font-family: 'Sarabun', sans-serif;
+    font-family: var(--font-doc);
     font-size: 9pt;
     color: #64748b;
   }
@@ -691,7 +716,12 @@ header.app-header {
     color: #0f172a !important;
     height: auto !important;
     overflow: visible !important;
-    font-size: 11pt;
+    font-size: 13pt;
+  }
+  /* Printed documents always use TH Sarabun New (it runs small, hence the larger base size) */
+  body,
+  body * {
+    font-family: var(--font-doc) !important;
   }
   * {
     -webkit-print-color-adjust: exact;
@@ -1167,8 +1197,10 @@ aside.app-sidebar {
 }
 
 /* Tint / gradient: pale theme-washed bars need dark ink in light mode */
+:root[data-sidebar-style="clean"] aside.app-sidebar { --sb-bg: #ffffff; }
 :root[data-sidebar-style="tint"] aside.app-sidebar { --sb-bg: color-mix(in srgb, var(--brand-primary) 9%, #ffffff); }
 :root[data-sidebar-style="gradient"] aside.app-sidebar { --sb-bg: linear-gradient(180deg, color-mix(in srgb, var(--brand-primary) 22%, #ffffff) 0%, #ffffff 70%); }
+:root:not(.dark)[data-sidebar-style="clean"] aside.app-sidebar,
 :root:not(.dark)[data-sidebar-style="tint"] aside.app-sidebar,
 :root:not(.dark)[data-sidebar-style="gradient"] aside.app-sidebar {
   --sb-fg: #0f172a;
@@ -1183,16 +1215,17 @@ aside.app-sidebar {
   --sb-ok: #047857;   /* emerald-700: readable on pale bars */
   --sb-warn: #b45309; /* amber-700 */
 }
-:root.dark[data-sidebar-style="tint"] aside.app-sidebar { --sb-bg: color-mix(in srgb, var(--brand-primary) 20%, #0f172a); }
-:root.dark[data-sidebar-style="gradient"] aside.app-sidebar { --sb-bg: linear-gradient(180deg, color-mix(in srgb, var(--brand-primary) 42%, #0f172a) 0%, #0f172a 75%); }
+:root.dark[data-sidebar-style="clean"] aside.app-sidebar { --sb-bg: var(--token-surface-chrome); }
+:root.dark[data-sidebar-style="tint"] aside.app-sidebar { --sb-bg: color-mix(in srgb, var(--brand-primary) 20%, #0D1424); }
+:root.dark[data-sidebar-style="gradient"] aside.app-sidebar { --sb-bg: linear-gradient(180deg, color-mix(in srgb, var(--brand-primary) 42%, #0D1424) 0%, #0D1424 75%); }
 
 /* Solid: full brand bar — stronger translucent whites for interaction layers, dark inset cards */
 :root[data-sidebar-style="solid"] aside.app-sidebar {
   --sb-bg: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--brand-primary) 80%, #0b1220) 0%,
-    color-mix(in srgb, var(--brand-primary) 58%, #0b1220) 45%,
-    color-mix(in srgb, var(--brand-primary) 30%, #0b1220) 100%
+    color-mix(in srgb, var(--brand-primary) 78%, #000000) 0%,
+    color-mix(in srgb, var(--brand-primary) 38%, #000000) 42%,
+    color-mix(in srgb, var(--brand-primary) 14%, #000000) 100%
   );
   --sb-hover: rgba(255, 255, 255, 0.12);
   --sb-active-bg: rgba(255, 255, 255, 0.24);
@@ -1204,9 +1237,19 @@ aside.app-sidebar {
   border-right-color: transparent;
 }
 
+/* Solid in dark mode: same hue, but mixed into the app's dark chrome so it sits beside the content instead of glowing against it */
+:root.dark[data-sidebar-style="solid"] aside.app-sidebar {
+  --sb-bg: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-primary) 62%, #0D1424) 0%,
+    color-mix(in srgb, var(--brand-primary) 34%, #0D1424) 45%,
+    color-mix(in srgb, var(--brand-primary) 16%, #0D1424) 100%
+  );
+}
+
 /* Premium: near-black bar, the open page is a theme-tinted pill */
 :root[data-sidebar-style="premium"] aside.app-sidebar {
-  --sb-bg: var(--token-surface-chrome);
+  --sb-bg: color-mix(in srgb, var(--brand-primary) 10%, #0D1424);
   --sb-active-bg: linear-gradient(90deg, color-mix(in srgb, var(--brand-primary) 55%, transparent), color-mix(in srgb, var(--brand-primary) 14%, transparent));
   border-right-color: var(--token-border-subtle);
 }

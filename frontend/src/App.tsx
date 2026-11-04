@@ -19,6 +19,7 @@ import { Sidebar } from './layouts/Sidebar';
 import { Header } from './layouts/Header';
 import { MobileBottomNav } from './layouts/MobileBottomNav';
 import { Footer } from './layouts/Footer';
+import { UpdateBanner } from './components/UpdateBanner';
 import { ScrollToTop } from './components/ScrollToTop';
 import { apiClient } from './services/apiClient';
 import { DEFAULT_SIDEBAR_STYLE, readSidebarStyle, saveSidebarStyle, type SidebarStyle } from './services/sidebarStyle';
@@ -180,7 +181,7 @@ function AppShell({ user, onLogout }: { user: AuthUser; onLogout: () => Promise<
     } catch {
       // Ignore storage access errors in restricted environments
     }
-    return GOVERNMENT_THEMES[0]; // Default: Royal Navy (#1E3A8A)
+    return GOVERNMENT_THEMES[0]; // Default: Vivid Blue (#3B82F6)
   });
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -360,6 +361,7 @@ function AppShell({ user, onLogout }: { user: AuthUser; onLogout: () => Promise<
           <Footer isOnline={isOnline} />
         </SecurityScopeProvider>
         <ScrollToTop containerRef={mainRef} />
+        <UpdateBanner />
       </div>
 
       {/* Bottom navigation for phones (< lg) */}

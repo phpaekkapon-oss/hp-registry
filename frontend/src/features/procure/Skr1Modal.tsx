@@ -279,7 +279,7 @@ export const Skr1Modal: React.FC<Props> = ({ open, onClose, fy, mode, notify }) 
                 <Loader2 className="h-6 w-6 animate-spin" /> กำลังประมวลผลข้อมูล สขร. 1...
               </div>
             ) : (
-              <div className="min-w-[900px] p-4 bg-white dark:bg-[var(--pf-surface)] print:p-0">
+              <div className="font-doc min-w-[900px] p-4 bg-white dark:bg-[var(--pf-surface)] print:p-0">
                 {/* Official Print Header */}
                 <div className="text-center mb-4">
                   <h3 className="font-prompt text-base font-bold text-ink">

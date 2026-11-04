@@ -290,26 +290,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </React.Fragment>
             );
           })}
-
-          {/* ── DB Status card ──────────────────────── */}
-          {showLabels && (
-            <div className="sb-card mx-1 mt-6 rounded-xl border p-3.5">
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-                </span>
-                <span className="sb-quiet font-mono text-[12px] tracking-wide font-semibold">dw_hp_procure</span>
-                <span className="sb-ok ml-auto text-[12px] font-bold">ออนไลน์</span>
-              </div>
-              {import.meta.env.DEV && (
-                <p className="sb-quiet mt-1.5 flex items-center gap-1 text-[11px]">
-                  <Zap className="sb-warn w-3 h-3" />
-                  <span className="font-mono">prefetch active</span>
-                </p>
-              )}
-            </div>
-          )}
         </nav>
 
         {/* ── User Profile Card ────────────────────── */}
@@ -360,10 +340,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
             </NavTooltip>
           )}
+
+          {/* ── DB Status ──────────────────────── */}
+          {showLabels && (
+            <div
+              className="mt-1 flex items-center gap-1.5 px-2 py-1"
+              title={import.meta.env.DEV ? 'prefetch active' : undefined}
+            >
+              <span className="relative flex h-1.5 w-1.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+              </span>
+              <span className="sb-quiet min-w-0 truncate font-mono text-[10px] tracking-wide">dw_hp_procure</span>
+              {import.meta.env.DEV && <Zap className="sb-warn w-2.5 h-2.5 shrink-0" aria-label="prefetch active" />}
+              <span className="sb-ok ml-auto text-[10px] font-medium">ออนไลน์</span>
+            </div>
+          )}
         </div>
 
         {/* ── Collapse Toggle ───────────────────────── */}
-        <div className="sb-hairline hidden lg:flex shrink-0 h-11 items-center border-t">
+        <div className="sb-hairline hidden lg:flex shrink-0 h-14 items-center border-t">
           <button
             type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}

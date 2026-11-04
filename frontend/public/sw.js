@@ -39,6 +39,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/')) return; // network only, never stored
+  if (url.pathname.endsWith('/version.json')) return; // must always reach the server to detect a new deployment
 
   // Page loads: network first (always the newest app), fall back to the cached shell when offline
   if (request.mode === 'navigate') {

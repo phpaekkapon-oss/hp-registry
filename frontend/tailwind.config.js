@@ -5,11 +5,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Sarabun"', '"Sarabun Fallback"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
-        prompt: ['"Sarabun"', '"Sarabun Fallback"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
-        sarabun: ['"Sarabun"', '"Sarabun Fallback"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
-        heading: ['"Sarabun"', '"Sarabun Fallback"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
-        mono: ['"Sarabun"', '"Sarabun Fallback"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
+        sans: ['"Noto Sans Thai"', '"Noto Sans Thai Fallback"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
+        prompt: ['"Noto Sans Thai"', '"Noto Sans Thai Fallback"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
+        sarabun: ['"Noto Sans Thai"', '"Noto Sans Thai Fallback"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
+        heading: ['"Noto Sans Thai"', '"Noto Sans Thai Fallback"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
+        doc: ['"TH Sarabun New"', '"Sarabun"', 'Tahoma', 'sans-serif'],
+        mono: ['"Noto Sans Thai"', '"Noto Sans Thai Fallback"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
       },
       colors: {
         chroma: {

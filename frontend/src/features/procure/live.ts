@@ -7,6 +7,7 @@
  * missed (a dropped connection, or someone editing the database directly).
  */
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { resolveApiUrl } from '../../services/apiClient';
 
 export interface LiveEvent {
   /** orders | contracts | incoming | guarantees | progress | notes, or "*" for "reload everything" */
@@ -36,7 +37,7 @@ const dispatch = (event: LiveEvent) => handlers.forEach((h) => h(event));
 
 function connect() {
   if (source || handlers.size === 0 || typeof EventSource === 'undefined') return;
-  source = new EventSource('/api/procure/events');
+  source = new EventSource(resolveApiUrl('/api/procure/events'));
   source.onopen = () => {
     setStatus('live');
     // After a drop we may have missed events: reload everything once

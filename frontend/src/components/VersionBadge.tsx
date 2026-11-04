@@ -12,12 +12,34 @@ const KIND_LABEL: Record<ReleaseKind, string> = {
 const formatDate = (iso: string): string =>
   new Date(`${iso}T00:00:00`).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
 
+const ACK_KEY = 'his_egov_ack_version';
+
+const readAcknowledged = (): string | null => {
+  try {
+    return localStorage.getItem(ACK_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const saveAcknowledged = (version: string): void => {
+  try {
+    localStorage.setItem(ACK_KEY, version);
+  } catch {
+    /* storage unavailable: the notice simply shows again next time */
+  }
+};
+
 const releaseUrl = (version: string): string | null =>
   __APP_REPO_URL__ ? `${__APP_REPO_URL__}/releases/tag/v${version}` : null;
 
-/** Footer pill showing the running version; opens the release history. */
-export const VersionBadge: React.FC = () => {
-  const [open, setOpen] = useState(false);
+/**
+ * Pill showing the running version; opens the release history.
+ * With `announce`, the dialog also opens by itself once per device after a new version is deployed,
+ * until the user presses "รับทราบแล้ว".
+ */
+export const VersionBadge: React.FC<{ announce?: boolean }> = ({ announce = false }) => {
+  const [open, setOpen] = useState(() => announce && readAcknowledged() !== __APP_VERSION__);
   const [selected, setSelected] = useState(__APP_VERSION__);
   const current = CHANGELOG.find((r) => r.version === selected) ?? CHANGELOG[0];
   const url = current ? releaseUrl(current.version) : null;
@@ -124,7 +146,7 @@ export const VersionBadge: React.FC = () => {
 
           <div className="flex justify-end border-t border-chroma-subtle p-4">
             <Dialog.Close asChild>
-              <button type="button" className="btn-brand min-h-[46px] cursor-pointer rounded-lg px-6 text-sm font-semibold">
+              <button type="button" onClick={() => saveAcknowledged(__APP_VERSION__)} className="btn-brand min-h-[46px] cursor-pointer rounded-lg px-6 text-sm font-semibold">
                 รับทราบแล้ว
               </button>
             </Dialog.Close>

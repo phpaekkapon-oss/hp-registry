@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {readFileSync} from 'fs';
-import {defineConfig} from 'vite';
+import {defineConfig, type Plugin} from 'vite';
 
 // Single source of truth for the version shown in the app: the root package.json (bumped by release.bat).
 const rootPkg = JSON.parse(readFileSync(path.resolve(__dirname, '../package.json'), 'utf8')) as {
@@ -13,11 +13,24 @@ const repoUrl = (typeof rootPkg.repository === 'string' ? rootPkg.repository : r
   .replace(/^git\+/, '')
   .replace(/\.git$/, '');
 
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
+const buildId = Date.now().toString(36);
+
+/** Publishes {version, build} next to index.html so open tabs can notice a newer deployment */
+const versionFile = (): Plugin => ({
+  name: 'version-file',
+  generateBundle() {
+    this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ version: rootPkg.version, build: buildId }) });
+  },
+});
+
+export default defineConfig(({ command }) => ({
+  // Served under /hp-registry/ on the server only; dev.bat (scripts/dev.mjs) expects the app at the root.
+  base: command === 'build' ? '/hp-registry/' : '/',
+  plugins: [react(), tailwindcss(), versionFile()],
   define: {
     __APP_VERSION__: JSON.stringify(rootPkg.version),
     __APP_REPO_URL__: JSON.stringify(repoUrl),
+    __APP_BUILD__: JSON.stringify(buildId),
   },
   resolve: {
     alias: {
@@ -57,4 +70,4 @@ export default defineConfig({
     // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
     watch: process.env.DISABLE_HMR === 'true' ? null : {},
   },
-});
+}));
