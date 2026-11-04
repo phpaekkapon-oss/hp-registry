@@ -4,6 +4,8 @@ import { reconnectLive } from '../procure/live';
 import { setLockedHandler, setSetup2faHandler, setUnauthorizedHandler } from '../../services/apiClient';
 
 const KEEP_ALIVE_MS = 5 * 60 * 1000;
+/** The warning "you will be signed out" appears this long before the automatic sign-out */
+const WARN_BEFORE_MS = 60_000;
 /** Used until the server tells us the admin's settings (same defaults as backend/src/services/settings.ts) */
 const DEFAULT_SECURITY: SecurityInfo = { hasPin: false, totpEnabled: false, lockMinutes: 5, logoutMinutes: 30, avatarUrl: null, backupLeft: 0, twofa: { required: false, enforced: false, deadline: null }, trustDeviceDays: 0 };
 
@@ -21,6 +23,10 @@ interface AuthContextValue {
   login: (username: string, password: string) => Promise<LoginResult>;
   loginTotp: (ticket: string, code: string, remember?: boolean) => Promise<LoginResult & { expired?: boolean }>;
   logout: (notice?: string) => Promise<void>;
+  /** Seconds left before the automatic sign-out for inactivity (null = not close to it) */
+  idleSecondsLeft: number | null;
+  /** "I am still here": postpones the sign-out and renews the session */
+  stayActive: () => void;
   /** Lock now (needs a PIN) */
   lock: () => Promise<void>;
   unlock: (pin: string) => Promise<string | null>;
@@ -44,6 +50,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const [locked, setLocked] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [serverUnreachable, setServerUnreachable] = useState(false);
+  const [idleSecondsLeft, setIdleSecondsLeft] = useState<number | null>(null);
   const lastActivity = useRef(Date.now());
   const lastKeepAlive = useRef(Date.now());
   const lockedRef = useRef(false);
@@ -136,10 +143,19 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     [endSession]
   );
 
+  // A 401 does not always mean "you were idle": the server may have restarted (a deploy) or the session may have
+  // been revoked, so only blame inactivity when the person really was idle for that long
+  const sessionEndedNotice = useCallback(() => {
+    const idleMs = Date.now() - lastActivity.current;
+    return idleMs >= security.logoutMinutes * 60_000
+      ? `หมดเวลาการใช้งาน (ไม่มีการใช้งานเกิน ${security.logoutMinutes} นาที) กรุณาเข้าสู่ระบบอีกครั้ง`
+      : 'การเชื่อมต่อสิ้นสุดลง (ระบบอาจเพิ่งอัปเดตหรือรีสตาร์ท หรือบัญชีถูกใช้งานจากที่อื่น) กรุณาเข้าสู่ระบบอีกครั้ง';
+  }, [security.logoutMinutes]);
+
   // Any API call answered with 401 means the session is gone (expired or signed out elsewhere);
   // a 423 means the screen was locked (here after a reload, or from another tab)
   useEffect(() => {
-    setUnauthorizedHandler(() => endSession('หมดเวลาการใช้งาน กรุณาเข้าสู่ระบบอีกครั้ง'));
+    setUnauthorizedHandler(() => endSession(sessionEndedNotice()));
     setLockedHandler(() => setLocked(true));
     // 428: the admin's 2FA policy now requires this person to set it up; reload the session so the setup screen shows
     setSetup2faHandler(() => void authService.me().then((s) => s && begin(s)));
@@ -148,7 +164,16 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       setLockedHandler(null);
       setSetup2faHandler(null);
     };
-  }, [endSession, begin]);
+  }, [endSession, begin, sessionEndedNotice]);
+
+  const stayActive = useCallback(() => {
+    lastActivity.current = Date.now();
+    lastKeepAlive.current = Date.now();
+    setIdleSecondsLeft(null);
+    void authService.me().then((s) => {
+      if (s === null) endSession(sessionEndedNotice());
+    });
+  }, [endSession, sessionEndedNotice]);
 
   // Idle handling (patient data must not stay on an unattended screen):
   //  - with a PIN: lock the screen after `lockMinutes`, sign out after `logoutMinutes`
@@ -166,6 +191,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     const timer = window.setInterval(() => {
       const now = Date.now();
       const idle = now - lastActivity.current;
+      const untilLogout = security.logoutMinutes * 60_000 - idle;
+      // Warn before the automatic sign-out (not while the PIN screen is up: that screen is the warning)
+      setIdleSecondsLeft(!lockedRef.current && untilLogout > 0 && untilLogout <= WARN_BEFORE_MS ? Math.ceil(untilLogout / 1000) : null);
       if (idle > security.logoutMinutes * 60_000) {
         void logout(`ออกจากระบบอัตโนมัติ เนื่องจากไม่มีการใช้งานเกิน ${security.logoutMinutes} นาที`);
         return;
@@ -177,20 +205,20 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       if (!lockedRef.current && lastActivity.current > lastKeepAlive.current && now - lastKeepAlive.current > Math.min(KEEP_ALIVE_MS, security.logoutMinutes * 30_000)) {
         lastKeepAlive.current = now;
         void authService.me().then((s) => {
-          if (s === null) endSession('หมดเวลาการใช้งาน กรุณาเข้าสู่ระบบอีกครั้ง');
+          if (s === null) endSession(sessionEndedNotice());
         });
       }
-    }, 10_000);
+    }, 1000);
 
     return () => {
       events.forEach((e) => window.removeEventListener(e, markActive));
       window.clearInterval(timer);
     };
-  }, [status, security, logout, lock, endSession]);
+  }, [status, security, logout, lock, endSession, sessionEndedNotice]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, security, locked, notice, serverUnreachable, login, loginTotp, logout, lock, unlock, setSecurity, retry: () => void checkSession() }),
-    [status, user, security, locked, notice, serverUnreachable, login, loginTotp, logout, lock, unlock, checkSession]
+    () => ({ status, user, security, locked, notice, serverUnreachable, idleSecondsLeft, stayActive, login, loginTotp, logout, lock, unlock, setSecurity, retry: () => void checkSession() }),
+    [status, user, security, locked, notice, serverUnreachable, idleSecondsLeft, stayActive, login, loginTotp, logout, lock, unlock, checkSession]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

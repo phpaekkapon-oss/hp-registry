@@ -272,6 +272,12 @@ let tableReady = false;
 async function ensureSessionTable(): Promise<void> {
   if (tableReady) return;
   await getPool().query('CREATE TABLE IF NOT EXISTS app_sessions (id INT AUTO_INCREMENT PRIMARY KEY, instance VARCHAR(100) NOT NULL, payload TEXT NOT NULL, INDEX idx_app_sessions_instance (instance)) DEFAULT CHARSET=utf8mb4');
+  // An earlier build of this table had no "instance" column (and the dev machine shares this database): add it, otherwise every save and restore fails
+  const [cols] = await getPool().query<import('mysql2/promise').RowDataPacket[]>("SHOW COLUMNS FROM app_sessions LIKE 'instance'");
+  if (cols.length === 0) {
+    await getPool().query("ALTER TABLE app_sessions ADD COLUMN instance VARCHAR(100) NOT NULL DEFAULT '' AFTER id, ADD INDEX idx_app_sessions_instance (instance)");
+    console.warn('[auth] app_sessions upgraded (added instance column)');
+  }
   tableReady = true;
 }
 

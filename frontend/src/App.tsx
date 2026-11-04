@@ -10,6 +10,7 @@ import { LoginPage } from './features/auth/LoginPage';
 import { LogoutDialog } from './features/auth/LogoutDialog';
 import { setExporter } from './features/procure/format';
 import { LockScreen } from './features/auth/LockScreen';
+import { IdleWarning } from './features/auth/IdleWarning';
 import { TwofaBanner, TwofaSetupScreen } from './features/auth/TwofaGate';
 import type { AuthUser } from './services/authService';
 import React, { Suspense, lazy, useState, useEffect, useCallback, useRef } from 'react';
@@ -408,6 +409,7 @@ function AuthGate() {
         <AppShell key={user.username} user={user} onLogout={() => logout()} />
       </div>
       {locked && <LockScreen user={user} />}
+      <IdleWarning />
     </>
   );
 }
