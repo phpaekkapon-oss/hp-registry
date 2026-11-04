@@ -6,6 +6,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createBackendApp } from './app';
+import { startBackupScheduler } from './services/backupPolicy';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -30,6 +31,7 @@ if (process.env.NODE_ENV === 'production') {
   app.get('/{*splat}', (_req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
+  startBackupScheduler();
 }
 
 app.listen(port, '0.0.0.0', () => {

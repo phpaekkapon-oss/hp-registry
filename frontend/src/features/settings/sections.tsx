@@ -1,11 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, Check, CheckCircle2, DatabaseBackup, Loader2, Moon, RefreshCw, ServerCog, Sun, XCircle } from 'lucide-react';
+import { AlertTriangle, Check, CheckCircle2, Loader2, Moon, RefreshCw, ServerCog, Sun } from 'lucide-react';
 import { GOVERNMENT_THEMES, type ThemeColorConfig } from '../../services/themeService';
 import { useSecurityScope, type RadiusTokenPreset } from '../../components/compound/EnterprisePrimitives';
-import { systemApi, type About, type BackupFile, type SystemStatus } from './systemApi';
+import { systemApi, type About, type SystemStatus } from './systemApi';
 
 const dateTime = (iso: string) => new Date(iso).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
-const kb = (b: number) => (b >= 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`);
 
 const Card: React.FC<{ title: string; hint?: string; actions?: React.ReactNode; children: React.ReactNode }> = ({ title, hint, actions, children }) => (
   <section className="gov-card space-y-4 p-5">
@@ -159,68 +158,6 @@ export const ConnectionsSection: React.FC = () => {
         </p>
       </Card>
     </div>
-  );
-};
-
-// ---------------------------------------------------------------------------
-// Backup
-// ---------------------------------------------------------------------------
-
-export const BackupSection: React.FC = () => {
-  const [files, setFiles] = useState<BackupFile[] | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
-
-  useEffect(() => {
-    systemApi.backups().then(setFiles).catch((e) => setMsg({ kind: 'error', text: e instanceof Error ? e.message : 'โหลดรายการไม่สำเร็จ' }));
-  }, []);
-
-  const run = async () => {
-    setBusy(true);
-    setMsg(null);
-    try {
-      const r = await systemApi.runBackup();
-      setFiles(r.backups);
-      setMsg({ kind: 'ok', text: `สำรองข้อมูลแล้ว ${r.tables} ตาราง ${r.rows.toLocaleString('th-TH')} แถว (${kb(r.bytes)})` });
-    } catch (e) {
-      setMsg({ kind: 'error', text: e instanceof Error ? e.message : 'สำรองข้อมูลไม่สำเร็จ' });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <Card
-      title="สำรองข้อมูล"
-      hint="ไฟล์สำรองเป็น SQL บีบอัดของฐานข้อมูลระบบพัสดุ เก็บ 30 ไฟล์ล่าสุด ระบบสำรองอัตโนมัติทุกวันเวลา 02:00 (Windows Task Scheduler: HP-Registry-Backup)"
-      actions={
-        <button type="button" disabled={busy} onClick={() => void run()} className="btn-brand inline-flex min-h-[44px] items-center gap-2 rounded-lg px-4 text-sm font-semibold cursor-pointer disabled:opacity-70">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <DatabaseBackup className="h-4 w-4" aria-hidden />} สำรองตอนนี้
-        </button>
-      }
-    >
-      {msg && (
-        <p role={msg.kind === 'error' ? 'alert' : 'status'} className={`flex items-center gap-2 text-sm font-medium ${msg.kind === 'ok' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
-          {msg.kind === 'ok' ? <CheckCircle2 className="h-4 w-4" aria-hidden /> : <XCircle className="h-4 w-4" aria-hidden />} {msg.text}
-        </p>
-      )}
-      {files === null ? (
-        <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin" aria-label="กำลังโหลด" /></div>
-      ) : files.length === 0 ? (
-        <p className="text-sm text-ink-3">ยังไม่มีไฟล์สำรอง</p>
-      ) : (
-        <ul className="divide-y divide-slate-200 text-sm dark:divide-white/10">
-          {files.slice(0, 12).map((f, i) => (
-            <li key={f.name} className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2.5">
-              <span className="font-mono text-xs sm:text-sm">{f.name}</span>
-              {i === 0 && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20">ล่าสุด</span>}
-              <span className="ml-auto tabular-nums text-ink-3">{dateTime(f.at)} · {kb(f.bytes)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-      <p className="text-xs text-ink-4">ไฟล์เก็บในโฟลเดอร์ backups ของเครื่องเซิร์ฟเวอร์ ควรคัดลอกไปเก็บอีกเครื่องหนึ่งด้วย (ใช้ npm run backup -w backend -- &lt;โฟลเดอร์ปลายทาง&gt;) และไฟล์มีข้อมูลจริง ควรจำกัดผู้เข้าถึง</p>
-    </Card>
   );
 };
 

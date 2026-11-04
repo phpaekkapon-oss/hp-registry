@@ -35,6 +35,7 @@ export const RESOURCE_TH: Record<string, string> = {
   auth: 'การเข้าสู่ระบบ',
   lookups: 'ตัวเลือกข้อมูล',
   ai: 'ผู้ช่วย AI',
+  backup: 'สำรองข้อมูล',
 };
 
 /** Fields that must never be stored in clear text in the log */

@@ -15,6 +15,15 @@ export interface ReleaseNote {
  */
 export const CHANGELOG: ReleaseNote[] = [
   {
+    version: '1.0.3',
+    date: '2026-11-04',
+    title: "ปรับปรุงระบบ",
+    kind: 'patch',
+    highlights: [
+      "ปรับปรุงประสิทธิภาพและแก้ไขข้อผิดพลาดเล็กน้อย",
+    ],
+  },
+  {
     version: '1.0.2',
     date: '2026-11-04',
     title: 'ผู้ช่วย AI และการแจ้งเวอร์ชันใหม่',

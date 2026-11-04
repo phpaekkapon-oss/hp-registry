@@ -4,9 +4,8 @@ import zlib from 'zlib';
 import { fileURLToPath } from 'url';
 import { mysql, connect } from './mysql';
 
-/** Compressed SQL dumps of the procurement database (schema + data); the newest KEEP files are kept. */
+/** Compressed SQL dumps of the procurement database (schema + data). Old files are removed by the retention policy (backupPolicy.ts). */
 
-const KEEP = 30;
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_BACKUP_DIR = path.resolve(here, '../../../backups');
 const dbName = () => process.env.DB_NAME || 'dw_hp_procure';
@@ -31,7 +30,7 @@ export function listBackups(dir = DEFAULT_BACKUP_DIR): BackupFile[] {
     .sort((a, b) => b.name.localeCompare(a.name));
 }
 
-export async function runBackup(dir = DEFAULT_BACKUP_DIR): Promise<{ file: string; tables: number; rows: number; bytes: number; removed: number }> {
+export async function runBackup(dir = DEFAULT_BACKUP_DIR): Promise<{ file: string; tables: number; rows: number; bytes: number }> {
   fs.mkdirSync(dir, { recursive: true });
   const now = new Date();
   const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
@@ -70,10 +69,25 @@ export async function runBackup(dir = DEFAULT_BACKUP_DIR): Promise<{ file: strin
       gz.end();
     });
 
-    const old = listBackups(dir).slice(KEEP);
-    for (const f of old) fs.unlinkSync(path.join(dir, f.name));
-    return { file, tables: tables.length, rows: rowTotal, bytes: fs.statSync(file).size, removed: old.length };
+    return { file, tables: tables.length, rows: rowTotal, bytes: fs.statSync(file).size };
   } finally {
     await conn.end();
   }
+}
+
+/** Deletes the named backups. Only exact names from listBackups() are accepted, so no other file can be reached. */
+export function deleteBackups(names: string[], dir = DEFAULT_BACKUP_DIR): string[] {
+  const existing = new Set(listBackups(dir).map((f) => f.name));
+  const removed: string[] = [];
+  for (const name of new Set(names)) {
+    if (!existing.has(name)) continue;
+    fs.unlinkSync(path.join(dir, name));
+    removed.push(name);
+  }
+  return removed;
+}
+
+/** Absolute path of one backup file, or null when the name is not a known backup */
+export function backupPath(name: string, dir = DEFAULT_BACKUP_DIR): string | null {
+  return listBackups(dir).some((f) => f.name === name) ? path.join(dir, name) : null;
 }

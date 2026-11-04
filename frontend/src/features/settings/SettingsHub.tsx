@@ -5,7 +5,8 @@ import type { ThemeColorConfig } from '../../services/themeService';
 import { SecuritySettings } from '../auth/SecuritySettings';
 import { SecurityCenter } from '../auth/SecurityCenter';
 import { TwofaAdmin } from '../auth/TwofaAdmin';
-import { AboutSection, BackupSection, ConnectionsSection, ThemeSection } from './sections';
+import { AboutSection, ConnectionsSection, ThemeSection } from './sections';
+import { BackupSection } from './BackupSection';
 
 const UserAdminView = lazy(() => import('../users/UserAdminView').then((m) => ({ default: m.UserAdminView })));
 const LookupsSection = lazy(() => import('./LookupsSection').then((m) => ({ default: m.LookupsSection })));

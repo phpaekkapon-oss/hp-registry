@@ -7,6 +7,11 @@
 import 'dotenv/config';
 import path from 'path';
 import { runBackup } from '../src/services/backup';
+import { getBackupPolicy, pruneBackups } from '../src/services/backupPolicy';
+import { getPool } from '../src/services/mysql';
 
 const r = await runBackup(process.argv[2] ? path.resolve(process.argv[2]) : undefined);
-console.log(`[backup] ${r.tables} tables, ${r.rows} rows -> ${r.file} (${(r.bytes / 1024).toFixed(1)} KB)${r.removed ? `; removed ${r.removed} old` : ''}`);
+// Clean-up rules from Settings → Backup apply to the default folder only (not to a copy made elsewhere)
+const removed = process.argv[2] ? [] : await pruneBackups(await getBackupPolicy()).catch(() => [] as string[]);
+console.log(`[backup] ${r.tables} tables, ${r.rows} rows -> ${r.file} (${(r.bytes / 1024).toFixed(1)} KB)${removed.length ? `; removed ${removed.length} old` : ''}`);
+await getPool().end().catch(() => undefined);

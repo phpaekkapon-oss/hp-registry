@@ -33,7 +33,8 @@ const ACK_KEY = 'his_egov_ack_build';
 /** When this build was made, read back from the build id (a base-36 timestamp set in vite.config.ts) */
 const builtAt = (): string => {
   const ms = parseInt(__APP_BUILD__, 36);
-  if (!Number.isFinite(ms)) return '';
+  // Dev server ids ("dev-1.0.1") are not timestamps
+  if (!Number.isFinite(ms) || ms < 1e12) return '';
   return new Intl.DateTimeFormat('th-TH-u-ca-buddhist', {
     timeZone: 'Asia/Bangkok',
     day: 'numeric',

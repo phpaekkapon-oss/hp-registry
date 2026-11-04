@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, Bot, CheckCircle2, KeyRound, Loader2, Plus, Radio, Save, Trash2, Wand2, XCircle, Zap } from 'lucide-react';
+import { ArrowDown, ArrowUp, Bot, CheckCircle2, KeyRound, Loader2, Plus, Radio, Save, Trash2, UserRound, Wand2, XCircle, Zap } from 'lucide-react';
 import { aiApi, type AiAttempt, type AiSettings, type AiTestResult } from './aiApi';
 
 const timeOf = (iso: string) => new Date(iso).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -27,35 +27,127 @@ const Card: React.FC<{ title: string; hint?: string; icon: React.ElementType; ac
   </section>
 );
 
-/**
- * 3D view of the fallback chain: one tile per model, in order. A glowing orb travels to whichever model
- * the latest request is on; a tile lifts while it is being tried, turns green on success and red on failure.
- */
-const ModelStage: React.FC<{ models: string[]; states: Record<string, NodeState>; active: string | null; stats: Record<string, { ok: number; total: number; avgMs: number }> }> = ({ models, states, active, stats }) => {
-  const activeIndex = active ? models.indexOf(active) : -1;
+const MODEL_FACE: Record<NodeState, { top: string; front: string; right: string; h: number }> = {
+  idle: { top: '#475569', front: '#1e293b', right: '#334155', h: 26 },
+  trying: { top: '#fbbf24', front: '#92400e', right: '#b45309', h: 52 },
+  ok: { top: '#34d399', front: '#065f46', right: '#047857', h: 70 },
+  fail: { top: '#fb7185', front: '#881337', right: '#9f1239', h: 18 },
+};
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+/** A floor line from a to b (plane coordinates), optionally with a data packet running along it */
+const Link: React.FC<{ a: Point; b: Point; tone?: 'active' | 'ok' | 'fail' | 'idle' }> = ({ a, b, tone = 'idle' }) => {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
   return (
-    <div className="ai-stage relative overflow-hidden rounded-2xl" role="img" aria-label={`ลำดับโมเดล AI ${models.length} ตัว${active ? ` กำลังใช้ ${active}` : ''}`}>
-      <div className="ai-stage-grid" aria-hidden />
-      <div className="ai-plane" style={{ ['--n' as string]: models.length }}>
+    <div
+      className={`ai-link ${tone === 'active' ? 'ai-link-active' : tone === 'ok' ? 'ai-link-ok' : tone === 'fail' ? 'ai-link-fail' : ''}`}
+      style={{ left: a.x, top: a.y, width: Math.hypot(dx, dy), ['--a' as string]: `${Math.atan2(dy, dx)}rad` }}
+    >
+      {tone === 'active' && <span className="ai-packet" />}
+    </div>
+  );
+};
+
+/**
+ * 3D scene of one AI request: the person (or the deploy) → this server → OpenRouter → the models in fallback order.
+ * Packets run along the links while a request is in flight; each model is a block that rises green when it answers,
+ * sinks red when it fails (and the next one lights up amber), or stays grey until it is used.
+ */
+const ModelStage: React.FC<{
+  models: string[];
+  states: Record<string, NodeState>;
+  stats: Record<string, { ok: number; total: number; avgMs: number }>;
+  busy: boolean;
+  who: string | null;
+  purpose: string | null;
+  keyLast4: string | null;
+}> = ({ models, states, stats, busy, who, purpose, keyLast4 }) => {
+  const person: Point = { x: 70, y: 200 };
+  const server: Point = { x: 275, y: 200 };
+  const hub: Point = { x: 465, y: 200 };
+  const n = models.length;
+  // Models fan out in two staggered columns so their labels do not overlap
+  const spacing = n > 1 ? Math.min(130, 360 / (n - 1)) : 0;
+  const modelAt = (i: number): Point => ({ x: 640 + (i % 2) * 80, y: 200 - ((n - 1) * spacing) / 2 + i * spacing });
+  const anyOk = Object.values(states).includes('ok');
+
+  return (
+    <div className="ai-stage rounded-2xl" role="img" aria-label={`ผู้ใช้ → เซิร์ฟเวอร์ → OpenRouter → โมเดล ${n} ตัว${busy ? ' กำลังทำงาน' : ''}`}>
+      <div className="ai-plane">
+        {/* person */}
+        <div className="ai-box" style={{ left: person.x - 30, top: person.y - 30, width: 60, height: 60, ['--h' as string]: '0px' }}>
+          <div className="ai-shadow" />
+          <div className="ai-face ai-top" style={{ borderRadius: '50%', background: 'radial-gradient(#38bdf8aa, #0369a144)', transform: 'translateZ(1px)' }} />
+          <div className={`ai-avatar ${busy ? 'ai-avatar-busy' : ''}`}>
+            <UserRound className="h-7 w-7" aria-hidden />
+          </div>
+          <div className="ai-label" style={{ ['--lift' as string]: '96px' }}>
+            {who === 'deploy' ? 'Deploy (อัตโนมัติ)' : who ?? 'ผู้ใช้'}
+            <small>{purpose ? (PURPOSE_TH[purpose] ?? purpose) : 'รอคำขอ'}</small>
+          </div>
+        </div>
+        <Link a={person} b={{ x: server.x - 40, y: server.y }} tone={busy ? 'active' : anyOk ? 'ok' : 'idle'} />
+
+        {/* this server */}
+        <div className="ai-box" style={{ left: server.x - 40, top: server.y - 40, width: 80, height: 80, ['--h' as string]: '140px' }}>
+          <div className="ai-shadow" />
+          <div className="ai-face ai-top" style={{ background: 'linear-gradient(135deg, #64748b, #334155)' }} />
+          <div className="ai-face ai-front ai-rack">
+            <span className="ai-led" style={{ top: 8 }} />
+            <span className="ai-led" style={{ top: 44 }} />
+            <span className="ai-led" style={{ top: 80 }} />
+          </div>
+          <div className="ai-face ai-right ai-rack" style={{ filter: 'brightness(1.3)' }} />
+          <div className="ai-label">
+            เซิร์ฟเวอร์ hp-registry
+            <small>{window.location.host}</small>
+          </div>
+        </div>
+        <Link a={{ x: server.x + 40, y: server.y }} b={{ x: hub.x - 30, y: hub.y }} tone={busy ? 'active' : anyOk ? 'ok' : 'idle'} />
+
+        {/* OpenRouter gateway */}
+        <div className="ai-box" style={{ left: hub.x - 30, top: hub.y - 30, width: 60, height: 60, ['--h' as string]: '50px' }}>
+          <div className="ai-shadow" />
+          <div className="ai-face ai-top" style={{ background: 'linear-gradient(135deg, #a78bfa, #6d28d9)', borderRadius: 10 }} />
+          <div className="ai-face ai-front" style={{ background: '#4c1d95' }} />
+          <div className="ai-face ai-right" style={{ background: '#5b21b6' }} />
+          <div className="ai-label">
+            OpenRouter
+            <small>{keyLast4 ? `คีย์ …${keyLast4}` : 'สลับโมเดลอัตโนมัติ'}</small>
+          </div>
+        </div>
+
+        {/* models, in fallback order */}
         {models.map((m, i) => {
           const st = states[m] ?? 'idle';
+          const face = MODEL_FACE[st];
+          const p = modelAt(i);
           const s = stats[m];
           return (
-            <div key={m} className={`ai-node ai-node-${st}`} style={{ ['--i' as string]: i }}>
-              <div className="ai-node-top">
-                <span className="ai-node-rank">{i + 1}</span>
-                <span className="ai-node-name">{shortModel(m)}</span>
-                <span className="ai-node-stat">{s ? `${Math.round((s.ok / s.total) * 100)}% · ${(s.avgMs / 1000).toFixed(1)} วิ` : 'ยังไม่เคยใช้'}</span>
+            <React.Fragment key={m}>
+              <Link a={{ x: hub.x + 30, y: hub.y }} b={{ x: p.x - 30, y: p.y }} tone={st === 'trying' ? 'active' : st === 'ok' ? 'ok' : st === 'fail' ? 'fail' : 'idle'} />
+              <div className={`ai-box ${st === 'fail' ? 'ai-shake' : ''}`} style={{ left: p.x - 30, top: p.y - 25, width: 60, height: 50, ['--h' as string]: `${face.h}px` }}>
+                <div className="ai-shadow" />
+                <div className="ai-face ai-top" style={{ background: face.top }} />
+                <div className="ai-face ai-front" style={{ background: face.front }} />
+                <div className="ai-face ai-right" style={{ background: face.right }} />
+                <div className="ai-label" style={{ ['--lift' as string]: '26px' }}>
+                  {i + 1} · {shortModel(m)}
+                  <small>{s ? `สำเร็จ ${Math.round((s.ok / s.total) * 100)}% · ${(s.avgMs / 1000).toFixed(1)} วิ` : 'ยังไม่เคยใช้'}</small>
+                </div>
               </div>
-              <div className="ai-node-side" aria-hidden />
-              {i < models.length - 1 && <div className={`ai-link ${st === 'fail' ? 'ai-link-hot' : ''}`} aria-hidden />}
-            </div>
+            </React.Fragment>
           );
         })}
-        {activeIndex >= 0 && <div className="ai-orb" style={{ ['--i' as string]: activeIndex }} aria-hidden />}
       </div>
-      <div className="absolute bottom-3 left-4 flex flex-wrap gap-3 text-[11px] font-semibold text-white/80">
-        <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-400" /> กำลังลอง</span>
+      <div className="ai-legend">
+        <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-sky-400" /> ข้อมูลกำลังวิ่ง</span>
+        <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-400" /> กำลังลองโมเดลนี้</span>
         <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-400" /> ตอบสำเร็จ</span>
         <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-400" /> ล้ม → สลับตัวถัดไป</span>
       </div>
@@ -76,6 +168,12 @@ export const AiSection: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [live, setLive] = useState(false);
+  // Re-evaluate "recent" every few seconds so a finished hand-over stops animating on its own
+  const [clock, setClock] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setClock((c) => c + 1), 3000);
+    return () => clearInterval(t);
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -107,21 +205,35 @@ export const AiSection: React.FC = () => {
   const dirty = settings !== null && (enabled !== settings.enabled || models.join('|') !== settings.models.join('|'));
 
   // State of each model in the most recent request
-  const { states, active } = useMemo(() => {
+  // What the 3D scene shows: the most recent request, or the one being tested right now
+  const scene = useMemo(() => {
     const latest = logs[0];
-    if (!latest) return { states: {} as Record<string, NodeState>, active: null as string | null };
-    const attempts = logs.filter((l) => l.requestId === latest.requestId).reverse();
-    const st: Record<string, NodeState> = {};
-    for (const a of attempts) st[a.model] = a.ok ? 'ok' : 'fail';
-    const last = attempts[attempts.length - 1];
-    const recent = Date.now() - new Date(last.at).getTime() < 8000;
-    if (recent && !last.ok) {
-      const next = models[models.indexOf(last.model) + 1];
-      if (next) st[next] = 'trying';
-      return { states: st, active: next ?? last.model };
+    const testing = busy === 'test';
+    const recent = latest ? Date.now() - new Date(latest.at).getTime() < 8000 : false;
+    const states: Record<string, NodeState> = {};
+    if (latest && (recent || !testing)) {
+      const attempts = logs.filter((l) => l.requestId === latest.requestId).reverse();
+      for (const a of attempts) states[a.model] = a.ok ? 'ok' : 'fail';
+      const last = attempts[attempts.length - 1];
+      if ((recent || testing) && !last.ok) {
+        const next = models[models.indexOf(last.model) + 1];
+        if (next) states[next] = 'trying';
+      }
     }
-    return { states: st, active: last.model };
-  }, [logs, models]);
+    // A test is running but no attempt has come back yet: the first model is being tried
+    if (testing && !Object.values(states).includes('trying') && !(recent && latest?.ok)) {
+      const first = models.find((m) => !states[m] || states[m] === 'idle');
+      if (first) states[first] = 'trying';
+    }
+    const inFlight = Object.values(states).includes('trying');
+    return {
+      states,
+      busy: inFlight,
+      who: testing ? null : latest?.runBy ?? null,
+      purpose: testing ? 'test' : latest?.purpose ?? null,
+      keyLast4: latest?.keyLast4 ?? null,
+    };
+  }, [logs, models, busy, clock]);
 
   const stats = useMemo(() => {
     const out: Record<string, { ok: number; total: number; avgMs: number }> = {};
@@ -186,7 +298,7 @@ export const AiSection: React.FC = () => {
           </span>
         }
       >
-        <ModelStage models={models} states={states} active={active} stats={stats} />
+        <ModelStage models={models} states={scene.states} stats={stats} busy={scene.busy} who={scene.who} purpose={scene.purpose} keyLast4={scene.keyLast4} />
 
         <div>
           <h3 className="mb-2 text-sm font-bold text-ink">ความเคลื่อนไหวล่าสุด</h3>

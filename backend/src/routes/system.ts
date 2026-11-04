@@ -3,7 +3,9 @@ import type { RowDataPacket } from 'mysql2/promise';
 import { requireAuth, requireMenu, requirePermission } from '../services/auth';
 import { getPool } from '../services/mysql';
 import { hosStatus } from '../services/hosxp';
-import { listBackups, runBackup } from '../services/backup';
+import path from 'path';
+import { DEFAULT_BACKUP_DIR, backupPath, deleteBackups, listBackups, runBackup } from '../services/backup';
+import { backupOnce, filesToPrune, getBackupPolicy, lastAutoRun, pruneBackups, saveBackupPolicy, type BackupPolicy } from '../services/backupPolicy';
 import { writeAudit } from '../services/audit';
 import { APP_VERSION, STARTED_AT } from '../services/version';
 import { clientIp } from './auth';
@@ -54,24 +56,95 @@ systemRouter.get('/status', ...adminOnly, async (_req: Request, res: Response) =
   });
 });
 
-systemRouter.get('/backups', ...adminOnly, (_req: Request, res: Response) => {
-  res.json({ success: true, data: listBackups() });
+const backupOverview = async () => {
+  const files = listBackups();
+  const policy = await getBackupPolicy();
+  return {
+    files,
+    dir: DEFAULT_BACKUP_DIR,
+    totalBytes: files.reduce((s, f) => s + f.bytes, 0),
+    policy,
+    /** Files the current rules would remove at the next clean-up */
+    pruneCandidates: filesToPrune(policy),
+    schedulerActive: process.env.NODE_ENV === 'production',
+    lastAutoRun,
+  };
+};
+
+const actorOf = (req: Request) => ({ username: req.auth!.user.username, name: req.auth!.user.displayName });
+
+systemRouter.get('/backups', ...adminOnly, async (_req: Request, res: Response) => {
+  try {
+    res.json({ success: true, data: await backupOverview() });
+  } catch (e) {
+    console.error('[backup]', e);
+    res.status(500).json({ success: false, message: 'โหลดรายการสำรองข้อมูลไม่สำเร็จ' });
+  }
 });
 
-let backingUp = false;
 systemRouter.post('/backups/run', ...adminOnly, async (req: Request, res: Response) => {
-  if (backingUp) return res.status(409).json({ success: false, message: 'กำลังสำรองข้อมูลอยู่ กรุณารอสักครู่' });
-  backingUp = true;
   try {
-    const r = await runBackup();
-    await writeAudit({ username: req.auth!.user.username, name: req.auth!.user.displayName }, clientIp(req), {
-      action: 'security', resource: 'auth', recordId: 'backup', summary: `สำรองข้อมูลด้วยตนเอง (${r.tables} ตาราง ${r.rows} แถว)`,
+    const r = await backupOnce(async () => {
+      const made = await runBackup();
+      const removed = await pruneBackups(await getBackupPolicy());
+      return { ...made, removed: removed.length };
     });
-    res.json({ success: true, data: { ...r, file: r.file.split(/[\/]/).pop(), backups: listBackups() } });
+    if (!r) return res.status(409).json({ success: false, message: 'กำลังสำรองข้อมูลอยู่ กรุณารอสักครู่' });
+    await writeAudit(actorOf(req), clientIp(req), {
+      action: 'security', resource: 'backup', recordId: 'manual', summary: `สำรองข้อมูลด้วยตนเอง (${r.tables} ตาราง ${r.rows} แถว)`,
+    });
+    res.json({ success: true, data: { tables: r.tables, rows: r.rows, bytes: r.bytes, removed: r.removed, file: path.basename(r.file), overview: await backupOverview() } });
   } catch (e) {
     console.error('[backup]', e);
     res.status(500).json({ success: false, message: 'สำรองข้อมูลไม่สำเร็จ' });
-  } finally {
-    backingUp = false;
   }
+});
+
+systemRouter.put('/backups/policy', ...adminOnly, async (req: Request, res: Response) => {
+  try {
+    const before = await getBackupPolicy();
+    const saved = await saveBackupPolicy((req.body ?? {}) as Partial<BackupPolicy>, req.auth!.user.username);
+    if (typeof saved === 'string') return res.status(400).json({ success: false, message: saved });
+    await writeAudit(actorOf(req), clientIp(req), {
+      action: 'update', resource: 'backup', recordId: 'policy',
+      summary: `ตั้งค่าสำรองข้อมูล: ${saved.autoBackup ? `อัตโนมัติทุกวัน ${saved.time} น.` : 'ปิดการสำรองอัตโนมัติ'} · เก็บไม่เกิน ${saved.keepCount} ไฟล์${saved.keepDays ? ` / ${saved.keepDays} วัน` : ''}`,
+      before, after: saved,
+    });
+    res.json({ success: true, data: await backupOverview() });
+  } catch (e) {
+    console.error('[backup]', e);
+    res.status(500).json({ success: false, message: 'บันทึกการตั้งค่าไม่สำเร็จ' });
+  }
+});
+
+// Delete several files at once (names must be exact backup file names)
+systemRouter.post('/backups/delete', ...adminOnly, async (req: Request, res: Response) => {
+  const names = (req.body as { names?: unknown } | undefined)?.names;
+  if (!Array.isArray(names) || names.length === 0 || names.length > 1000 || !names.every((n) => typeof n === 'string')) {
+    return res.status(400).json({ success: false, message: 'กรุณาเลือกไฟล์ที่จะลบ' });
+  }
+  try {
+    const all = listBackups();
+    if (all.length > 0 && names.length >= all.length) {
+      return res.status(400).json({ success: false, message: 'ต้องเหลือไฟล์สำรองไว้อย่างน้อย 1 ไฟล์' });
+    }
+    const removed = deleteBackups(names as string[]);
+    if (removed.length > 0) {
+      await writeAudit(actorOf(req), clientIp(req), {
+        action: 'delete', resource: 'backup', recordId: null, summary: `ลบไฟล์สำรองข้อมูล ${removed.length} ไฟล์`, before: removed,
+      });
+    }
+    res.json({ success: true, data: { removed: removed.length, overview: await backupOverview() } });
+  } catch (e) {
+    console.error('[backup]', e);
+    res.status(500).json({ success: false, message: 'ลบไฟล์ไม่สำเร็จ' });
+  }
+});
+
+// Download one file (real data: admin only, and every download is logged)
+systemRouter.get('/backups/file/:name', ...adminOnly, async (req: Request, res: Response) => {
+  const file = backupPath(String(req.params.name));
+  if (!file) return res.status(404).json({ success: false, message: 'ไม่พบไฟล์' });
+  await writeAudit(actorOf(req), clientIp(req), { action: 'security', resource: 'backup', recordId: path.basename(file), summary: `ดาวน์โหลดไฟล์สำรอง ${path.basename(file)}` });
+  res.download(file, path.basename(file));
 });

@@ -13,20 +13,24 @@ const repoUrl = (typeof rootPkg.repository === 'string' ? rootPkg.repository : r
   .replace(/^git\+/, '')
   .replace(/\.git$/, '');
 
-const buildId = Date.now().toString(36);
+// A real build gets a fresh id (each deploy must be acknowledged again). The dev server keeps one id per version,
+// otherwise every restart of dev.bat would ask for the "what's new" confirmation again.
+const buildIdFor = (command: string) => (command === 'build' ? Date.now().toString(36) : `dev-${rootPkg.version}`);
 
 /** Publishes {version, build} next to index.html so open tabs can notice a newer deployment */
-const versionFile = (): Plugin => ({
+const versionFile = (buildId: string): Plugin => ({
   name: 'version-file',
   generateBundle() {
     this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ version: rootPkg.version, build: buildId }) });
   },
 });
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ command }) => {
+  const buildId = buildIdFor(command);
+  return {
   // Served under /hp-registry/ on the server only; dev.bat (scripts/dev.mjs) expects the app at the root.
   base: command === 'build' ? '/hp-registry/' : '/',
-  plugins: [react(), tailwindcss(), versionFile()],
+  plugins: [react(), tailwindcss(), versionFile(buildId)],
   define: {
     __APP_VERSION__: JSON.stringify(rootPkg.version),
     __APP_REPO_URL__: JSON.stringify(repoUrl),
@@ -70,4 +74,5 @@ export default defineConfig(({ command }) => ({
     // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
     watch: process.env.DISABLE_HMR === 'true' ? null : {},
   },
-}));
+};
+});
