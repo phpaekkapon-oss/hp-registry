@@ -629,6 +629,19 @@ export const Header: React.FC<HeaderProps> = ({
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
           </button>
 
+          {/* One-click install, only while the browser is offering it (otherwise the user menu explains how) */}
+          {installApp.canInstall && (
+            <button
+              type="button"
+              onClick={() => void installApp.install()}
+              title="ติดตั้งระบบงานพัสดุเป็นแอปบนเครื่องนี้ (เปิดเป็นหน้าต่างเฉพาะ มีไอคอนบนเดสก์ท็อป)"
+              className="hidden lg:inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] px-3.5 text-sm font-semibold text-ink-2 hover:bg-slate-50 dark:hover:bg-[var(--token-surface-elevated)] transition-colors cursor-pointer"
+            >
+              <Download className="w-4 h-4" aria-hidden />
+              ติดตั้งแอป
+            </button>
+          )}
+
           {/* Dark / Light Mode Toggle Button (48x48px) */}
           <button
             type="button"
