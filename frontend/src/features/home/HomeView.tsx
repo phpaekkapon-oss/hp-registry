@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ArrowRight, BellRing, CalendarDays, CheckCircle2, ClipboardList, FilePlus2, FileSignature, Inbox, ListChecks, Loader2, LockKeyhole,
-  PackageCheck, ShieldCheck, ShoppingCart, Wallet,
+  Activity, ArrowRight, BellRing, CalendarDays, CheckCircle2, ClipboardList, FilePlus2, FileSignature, Inbox, ListChecks, Loader2, LockKeyhole,
+  PackageCheck, PieChart, ShieldCheck, ShoppingCart, Wallet,
 } from 'lucide-react';
 import { Select } from '../../components/ui/select';
 import { useAuth } from '../auth/AuthContext';
@@ -58,14 +58,14 @@ function monthSlot(iso: unknown, year: number, mode: PeriodMode): number | null 
 
 // ---------------------------------------------------------------------------
 
-const Card: React.FC<{ title: string; icon: React.ElementType; action?: React.ReactNode; children: React.ReactNode; className?: string }> = ({ title, icon: Icon, action, children, className = '' }) => (
+const Card: React.FC<{ title: string; icon: React.ElementType; action?: React.ReactNode; children: React.ReactNode; className?: string; center?: boolean }> = ({ title, icon: Icon, action, children, className = '', center = false }) => (
   <section className={`gov-card flex flex-col ${className}`} aria-label={title}>
     <div className="flex min-h-[56px] items-center gap-2.5 border-b border-slate-200 px-5 py-2 dark:border-white/10">
       <Icon className="h-[18px] w-[18px] text-brand" aria-hidden />
       <h2 className="font-prompt text-[15px] font-bold">{title}</h2>
       {action && <div className="ml-auto">{action}</div>}
     </div>
-    <div className="min-h-0 flex-1 p-5">{children}</div>
+    <div className={`min-h-0 flex-1 p-5 ${center ? 'flex flex-col justify-center' : ''}`}>{children}</div>
   </section>
 );
 
@@ -80,7 +80,7 @@ const Kpi: React.FC<{ icon: React.ElementType; tone: string; label: string; valu
         <span className={`block font-prompt text-2xl font-bold leading-tight tabular-nums ${warn ? 'text-amber-700 dark:text-amber-300' : ''}`}>
           <Flash value={value} format={format}>{format(value)}</Flash>
         </span>
-        <span className="block truncate text-xs text-ink-4">{sub}</span>
+        <span className="block truncate text-xs text-ink-4" title={sub}>{sub}</span>
       </span>
     </>
   );
@@ -146,7 +146,7 @@ const TrendChart: React.FC<{ orders: number[]; contracts: number[]; kind: ChartK
   const max = Math.max(1, ...orders, ...contracts);
   const top = metric === 'count' ? Math.max(4, Math.ceil(max / 4) * 4) : niceTop(max);
   const W = 640;
-  const H = 220;
+  const H = 170;
   const pad = { l: metric === 'count' ? 30 : 52, r: 8, t: 10, b: 26 };
   const cw = (W - pad.l - pad.r) / 12;
   const y = (v: number) => pad.t + (H - pad.t - pad.b) * (1 - v / top);
@@ -415,10 +415,10 @@ export const HomeView: React.FC<Props> = ({ onOpen, onOpenSecurity }) => {
           <Kpi icon={FileSignature} tone="bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300" label="สัญญา" value={summary?.counts.contracts ?? contracts.length} sub={`มูลค่า ${money(stats.contractValue)} บาท`} onClick={() => onOpen('contracts')} />
         )}
         {(has('orders') || has('contracts')) && (
-          <Kpi icon={Wallet} tone="bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300" label="มูลค่ารวม (บาท)" value={stats.orderValue + stats.contractValue} format={(n) => money(n)} sub="ราคาที่ตกลง (หรือวงเงินที่ได้รับจัดสรร)" />
+          <Kpi icon={Wallet} tone="bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300" label="มูลค่ารวม (บาท)" value={stats.orderValue + stats.contractValue} format={(n) => money(n)} sub="ราคาที่ตกลง/วงเงินจัดสรร" />
         )}
         {(has('orders') || has('contracts')) && (
-          <Kpi icon={PackageCheck} tone="bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" label="ยังไม่ตรวจรับ" value={stats.notInspected} warn={stats.notInspected > 0} sub="ใบสั่งและสัญญาที่ยังไม่มีวันที่ตรวจรับ" onClick={() => onOpen(has('orders') ? 'orders' : 'contracts')} />
+          <Kpi icon={PackageCheck} tone="bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" label="ยังไม่ตรวจรับ" value={stats.notInspected} warn={stats.notInspected > 0} sub="ยังไม่มีวันที่ตรวจรับ" onClick={() => onOpen(has('orders') ? 'orders' : 'contracts')} />
         )}
         {has('incoming') && (
           <Kpi icon={Inbox} tone="bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300" label="หนังสือรับ" value={summary?.counts.incoming ?? 0} sub="ในปีงบประมาณนี้" onClick={() => onOpen('incoming')} />
@@ -483,16 +483,16 @@ export const HomeView: React.FC<Props> = ({ onOpen, onOpenSecurity }) => {
 
         {/* Methods */}
         {(has('orders') || has('contracts')) && (
-          <Card title="วิธีจัดซื้อจัดจ้าง" icon={ListChecks}>
+          <Card title="วิธีจัดซื้อจัดจ้าง" icon={PieChart} center>
             <Donut parts={methods} />
           </Card>
         )}
 
         {/* Progress */}
         {has('progress') && (
-          <Card title="ความก้าวหน้าการจัดหา" icon={ListChecks} action={<button type="button" onClick={() => onOpen('progress')} className="inline-flex min-h-[32px] items-center gap-1 text-xs font-semibold text-brand cursor-pointer hover:underline">ดูทั้งหมด <ArrowRight className="h-3.5 w-3.5" aria-hidden /></button>}>
+          <Card title="ความก้าวหน้าการจัดหา" icon={ListChecks} center={progress.length === 0} action={<button type="button" onClick={() => onOpen('progress')} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-brand-soft px-3 text-sm font-semibold text-brand cursor-pointer transition-opacity hover:opacity-80">ดูทั้งหมด <ArrowRight className="h-3.5 w-3.5" aria-hidden /></button>}>
             {progress.length === 0 ? (
-              <p className="py-6 text-center text-sm text-ink-4">ยังไม่มีโครงการที่ติดตามความก้าวหน้า</p>
+              <div className="flex flex-col items-center gap-3 py-6 text-center"><ListChecks className="h-9 w-9 text-ink-5" aria-hidden /><p className="text-sm text-ink-4">ยังไม่มีโครงการที่ติดตามความก้าวหน้า</p><button type="button" onClick={() => onOpen('progress')} className="btn-brand inline-flex min-h-[40px] cursor-pointer items-center gap-1.5 rounded-lg px-4 text-sm font-semibold">เริ่มติดตามโครงการ <ArrowRight className="h-4 w-4" aria-hidden /></button></div>
             ) : (
               <div className="space-y-4">
                 <div className="flex items-baseline gap-2">
@@ -521,7 +521,7 @@ export const HomeView: React.FC<Props> = ({ onOpen, onOpenSecurity }) => {
         )}
 
         {/* Activity */}
-        <Card title="ความเคลื่อนไหวล่าสุด" icon={BellRing}>
+        <Card title="ความเคลื่อนไหวล่าสุด" icon={Activity}>
           {items.length === 0 ? (
             <p className="py-6 text-center text-sm text-ink-4">ยังไม่มีการเปลี่ยนแปลงจากผู้ใช้อื่น</p>
           ) : (

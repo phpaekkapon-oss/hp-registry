@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Wifi, WifiOff } from 'lucide-react';
-import { VersionBadge } from '../components/VersionBadge';
+import { DeveloperInfo } from '../components/DeveloperInfo';
 
 interface FooterProps {
   isOnline: boolean;
@@ -30,7 +30,7 @@ export const Footer: React.FC<FooterProps> = ({ isOnline }) => {
       </p>
 
       <div className="shrink-0 flex items-center gap-4">
-        <VersionBadge />
+        <DeveloperInfo />
         <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
           {isOnline ? (
             <Wifi className="w-4 h-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />

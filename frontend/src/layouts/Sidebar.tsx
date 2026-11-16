@@ -4,6 +4,8 @@ import type { AuthUser } from '../services/authService';
 import { UserAvatar } from '../features/auth/UserAvatar';
 import { ROLE_LABELS } from '../services/enterpriseService';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import * as Popover from '@radix-ui/react-popover';
+import { DeveloperInfo } from '../components/DeveloperInfo';
 import {
   LayoutDashboard,
   Users,
@@ -14,7 +16,6 @@ import {
   X,
   Plus,
   Building2,
-  Zap,
   ClipboardList,
   House,
   Inbox,
@@ -99,6 +100,49 @@ const NavTooltip: React.FC<{ label: string; enabled: boolean; children: React.Re
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip.Root>
+  );
+};
+
+/** Collapsed rail: hovering the procurement icon opens a labelled list of its registers beside the rail */
+const ProcureFlyout: React.FC<{ enabled: boolean; onPick: (id: string) => void; children: React.ReactNode }> = ({ enabled, onPick, children }) => {
+  const [open, setOpen] = React.useState(false);
+  const timer = React.useRef<number | undefined>(undefined);
+  if (!enabled) return <>{children}</>;
+  const show = () => { window.clearTimeout(timer.current); setOpen(true); };
+  const hide = () => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setOpen(false), 140); };
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Anchor asChild>
+        <div className="w-full" onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide}>{children}</div>
+      </Popover.Anchor>
+      <Popover.Portal>
+        <Popover.Content
+          side="right"
+          align="start"
+          sideOffset={10}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onMouseEnter={show}
+          onMouseLeave={hide}
+          className="z-[70] w-64 rounded-xl bg-slate-900 p-1.5 text-white shadow-2xl ring-1 ring-white/10"
+        >
+          <p className="px-3 pb-1.5 pt-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">งานพัสดุ</p>
+          {PROCURE_SUB_ITEMS.map((sub) => {
+            const SubIcon = sub.icon;
+            return (
+              <button
+                key={sub.id}
+                type="button"
+                onClick={() => { setOpen(false); onPick(sub.id); }}
+                className="flex min-h-[40px] w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 text-left text-[13px] font-medium text-slate-100 transition-colors hover:bg-white/10"
+              >
+                <SubIcon className="h-[17px] w-[17px] shrink-0 text-slate-300" strokeWidth={1.8} aria-hidden />
+                <span className="truncate">{sub.label}</span>
+              </button>
+            );
+          })}
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   );
 };
 
@@ -217,12 +261,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = activeNav === item.id;
-            const isProcureExpanded = item.id === 'procure' && showLabels;
+            const hasSubMenu = item.id === 'procure' && showLabels;
+            const isFlyout = item.id === 'procure' && !showLabels;
 
             return (
               <React.Fragment key={item.id}>
 
-                <NavTooltip label={item.label} enabled={!showLabels}>
+                <ProcureFlyout enabled={isFlyout} onPick={(id) => { onOpenTab?.(id); setActiveNav('procure'); setIsMobileOpen(false); }}>
+                <NavTooltip label={item.label} enabled={!showLabels && !isFlyout}>
                   <button
                     type="button"
                     aria-label={item.label}
@@ -261,9 +307,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     )}
                   </button>
                 </NavTooltip>
+                </ProcureFlyout>
 
                 {/* Procurement sub-menu: flat monochrome list on a thin tree line */}
-                {isProcureExpanded && (
+                {hasSubMenu && (
                   <div className="sb-tree ml-6 mt-0.5 mb-1.5 pl-3 space-y-px">
                     {PROCURE_SUB_ITEMS.map((sub) => {
                       const SubIcon = sub.icon;
@@ -279,9 +326,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           className="sb-sublink group flex min-h-[36px] w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left cursor-pointer"
                         >
                           <SubIcon className="w-[17px] h-[17px] shrink-0" strokeWidth={1.8} aria-hidden />
-                          <span className="text-[13px] font-medium truncate">
-                            {sub.label}
-                          </span>
+                          <span className="text-[13px] font-medium truncate">{sub.label}</span>
                         </button>
                       );
                     })}
@@ -341,21 +386,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </NavTooltip>
           )}
 
-          {/* ── DB Status ──────────────────────── */}
-          {showLabels && (
-            <div
-              className="mt-1 flex items-center gap-1.5 px-2 py-1"
-              title={import.meta.env.DEV ? 'prefetch active' : undefined}
-            >
-              <span className="relative flex h-1.5 w-1.5 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-              </span>
-              <span className="sb-quiet min-w-0 truncate font-mono text-[10px] tracking-wide">dw_hp_procure</span>
-              {import.meta.env.DEV && <Zap className="sb-warn w-2.5 h-2.5 shrink-0" aria-label="prefetch active" />}
-              <span className="sb-ok ml-auto text-[10px] font-medium">ออนไลน์</span>
-            </div>
-          )}
+          <DeveloperInfo variant="sidebar" compact={!showLabels} />
         </div>
 
         {/* ── Collapse Toggle ───────────────────────── */}
