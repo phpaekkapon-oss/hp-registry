@@ -116,6 +116,31 @@ export function useInstallApp(): InstallState {
   };
 }
 
+/** Chrome serialises colour-mix() results as color(srgb ...), so normalise any CSS colour to #rrggbb through a 1px canvas */
+function toHex(color: string): string | null {
+  const ctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+  if (!ctx) return null;
+  ctx.canvas.width = ctx.canvas.height = 1;
+  ctx.fillStyle = '#000000';
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+  return a === 0 ? null : `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+}
+
+/**
+ * The colour at the top of the side menu as actually painted (solid colour, or the first stop of its gradient).
+ * null when the menu is not on screen (e.g. collapsed on a phone), so the caller can use a fallback.
+ */
+export function readSidebarTopColor(): string | null {
+  const aside = document.querySelector<HTMLElement>('aside.app-sidebar');
+  if (!aside || aside.offsetWidth === 0) return null;
+  const style = getComputedStyle(aside);
+  const gradientStop = /linear-gradient\([^]*?((?:rgba?|color)\([^)]*\))/.exec(style.backgroundImage)?.[1];
+  const color = gradientStop ?? style.backgroundColor;
+  return color && color !== 'rgba(0, 0, 0, 0)' ? toHex(color) : null;
+}
+
 /** Colours the browser UI (Android status bar / installed-app title bar) to match the app */
 export function setBrowserThemeColor(color: string): void {
   let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');

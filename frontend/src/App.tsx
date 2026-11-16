@@ -4,7 +4,7 @@
  */
 
 import { PrintLetterhead } from './components/PrintLetterhead';
-import { setBrowserThemeColor } from './services/pwa';
+import { readSidebarTopColor, setBrowserThemeColor } from './services/pwa';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { LoginPage } from './features/auth/LoginPage';
 import { LogoutDialog } from './features/auth/LogoutDialog';
@@ -220,27 +220,9 @@ function AppShell({ user, onLogout }: { user: AuthUser; onLogout: () => Promise<
     root.style.setProperty('--brand-primary-hover', activeTheme.hoverHex);
     root.style.setProperty('--token-radius-card', radiusToken);
     root.classList.toggle('dark', isDarkMode);
-    // The installed-app title bar must match the header, which in dark mode is the brand-tinted chrome surface
-    // (it changes with the chosen theme colour), so read the real colour instead of a fixed one.
-    let titleBar = isDarkMode ? '#0D1424' : '#FFFFFF';
-    if (isDarkMode) {
-      const probe = document.createElement('span');
-      probe.style.cssText = 'position:absolute;visibility:hidden;background-color:var(--token-surface-chrome)';
-      document.body.appendChild(probe);
-      const resolved = getComputedStyle(probe).backgroundColor;
-      probe.remove();
-      // Chrome serialises colour-mix() results as color(srgb ...), so normalise through a 1px canvas to plain RGB
-      const ctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
-      if (ctx && resolved) {
-        ctx.canvas.width = ctx.canvas.height = 1;
-        ctx.fillStyle = '#000000';
-        ctx.fillStyle = resolved;
-        ctx.fillRect(0, 0, 1, 1);
-        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-        titleBar = `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
-      }
-    }
-    setBrowserThemeColor(titleBar);
+    // The installed-app title bar takes the colour at the top of the side menu (it follows the chosen theme
+    // colour and menu style), so it reads as one piece with the menu. Fixed colours are only the fallback.
+    setBrowserThemeColor(readSidebarTopColor() ?? (isDarkMode ? '#0D1424' : '#FFFFFF'));
 
     try {
       localStorage.setItem('his_egov_theme_id', activeTheme.id);
@@ -249,7 +231,7 @@ function AppShell({ user, onLogout }: { user: AuthUser; onLogout: () => Promise<
     } catch {
       // Ignore storage write errors
     }
-  }, [activeTheme, isDarkMode, radiusToken]);
+  }, [activeTheme, isDarkMode, radiusToken, sidebarStyle]);
 
   // The role comes from the server-side session; it cannot be changed from the UI
   const currentRole: EnterpriseRole = user.role;
