@@ -8,7 +8,7 @@
  * Bump CACHE_VERSION to force clients to drop old caches.
  */
 const CACHE_VERSION = 'v1';
-const STATIC_CACHE = `his-static-${CACHE_VERSION}`;
+const STATIC_CACHE = `hp-registry-static-${CACHE_VERSION}`;
 // Relative on purpose: the app can live under a sub-path (/hp-registry/), the worker's scope is that folder
 const SHELL_URLS = ['./', 'manifest.webmanifest', 'favicon.svg', 'icons/icon-192.png'];
 const SHELL = new URL('./', self.registration.scope).href;
@@ -29,7 +29,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('his-static-') && k !== STATIC_CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('hp-registry-static-') && k !== STATIC_CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
