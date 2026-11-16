@@ -173,7 +173,7 @@ export interface Skr1RowItem {
 export async function exportSkr1Excel({
   monthName,
   year,
-  agencyName = 'กองโรคติดต่อทั่วไป กรมควบคุมโรค กระทรวงสาธารณสุข',
+  agencyName = 'กลุ่มงานบริหารงานทั่วไป โรงพยาบาลพังโคน กระทรวงสาธารณสุข',
   items,
 }: {
   monthName: string;

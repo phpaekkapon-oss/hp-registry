@@ -335,7 +335,7 @@ export const ProcurementView: React.FC<{ currentRole: EnterpriseRole; menus: str
                 ทะเบียนคุมใบสั่ง/สัญญา
               </h2>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-white/10 dark:text-slate-300 dark:ring-white/15">
-                กองโรคติดต่อทั่วไป กรมควบคุมโรค
+                กลุ่มงานบริหารงานทั่วไป โรงพยาบาลพังโคน
               </span>
             </div>
 

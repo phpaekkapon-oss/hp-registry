@@ -50,7 +50,7 @@ export const PrintLetterhead: React.FC<PrintLetterheadProps> = ({ user, activeNa
         </svg>
         <div className="leading-tight">
           <p className="text-lg font-semibold text-slate-900">ระบบงานพัสดุ</p>
-          <p className="text-sm text-slate-600">กองโรคติดต่อทั่วไป กรมควบคุมโรค</p>
+          <p className="text-sm text-slate-600">กลุ่มงานบริหารงานทั่วไป โรงพยาบาลพังโคน</p>
         </div>
       </div>
       <p className="text-sm font-semibold text-slate-700 text-right leading-tight">

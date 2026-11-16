@@ -172,7 +172,7 @@ export const AboutSection: React.FC = () => {
   }, []);
   const up = about ? Math.floor(about.uptimeSeconds / 3600) : 0;
   return (
-    <Card title="เกี่ยวกับระบบ" hint="ระบบงานพัสดุ · กองโรคติดต่อทั่วไป กรมควบคุมโรค">
+    <Card title="เกี่ยวกับระบบ" hint="ระบบงานพัสดุ · กลุ่มงานบริหารงานทั่วไป โรงพยาบาลพังโคน">
       <dl className="grid gap-3 text-sm sm:grid-cols-4">
         <div><dt className="text-xs font-semibold text-ink-4">เวอร์ชัน</dt><dd className="mt-0.5 font-semibold">v{about?.version ?? '–'}</dd></div>
         <div><dt className="text-xs font-semibold text-ink-4">โหมด</dt><dd className="mt-0.5 font-semibold">{about ? (about.environment === 'production' ? 'ใช้งานจริง (production)' : 'พัฒนา (development)') : '–'}</dd></div>

@@ -51,7 +51,7 @@
     <rect width="1080" height="100" rx="16" fill="#ffffff" filter="url(#shadow)" stroke="#e2e8f0" stroke-width="1"/>
     <rect x="0" y="0" width="8" height="100" rx="4" fill="url(#header-grad)"/>
     <text x="36" y="42" class="title" font-size="24">ผังวงจรชีวิตการทำงานระบบพัสดุและสัญญา (Procurement Lifecycle Flowchart)</text>
-    <text x="36" y="74" class="subtitle">กองโรคติดต่อทั่วไป กรมควบคุมโรค • อ้างอิง พ.ร.บ. การจัดซื้อจัดจ้างฯ พ.ศ. 2560 และ พ.ร.บ. ข้อมูลข่าวสารฯ พ.ศ. 2540 (สขร. 1)</text>
+    <text x="36" y="74" class="subtitle">กลุ่มงานบริหารงานทั่วไป โรงพยาบาลพังโคน • อ้างอิง พ.ร.บ. การจัดซื้อจัดจ้างฯ พ.ศ. 2560 และ พ.ร.บ. ข้อมูลข่าวสารฯ พ.ศ. 2540 (สขร. 1)</text>
     <rect x="910" y="32" width="134" height="34" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
     <text x="977" y="54" text-anchor="middle" fill="#1d4ed8" font-size="13" font-weight="700">คู่มือปฏิบัติงาน</text>
   </g>

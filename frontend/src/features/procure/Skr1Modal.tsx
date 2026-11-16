@@ -128,7 +128,7 @@ export const Skr1Modal: React.FC<Props> = ({ open, onClose, fy, mode, notify }) 
       await exportSkr1Excel({
         monthName,
         year: selectedYear,
-        agencyName: 'กองโรคติดต่อทั่วไป กรมควบคุมโรค กระทรวงสาธารณสุข',
+        agencyName: 'กลุ่มงานบริหารงานทั่วไป โรงพยาบาลพังโคน กระทรวงสาธารณสุข',
         items,
       });
       notify(`ส่งออกรายงาน สขร. 1 ประจำเดือน ${monthName} แล้ว`, 'success');
@@ -162,7 +162,7 @@ export const Skr1Modal: React.FC<Props> = ({ open, onClose, fy, mode, notify }) 
                   </span>
                 </Dialog.Title>
                 <Dialog.Description className="text-xs text-ink-5">
-                  กองโรคติดต่อทั่วไป กรมควบคุมโรค กระทรวงสาธารณสุข
+                  กลุ่มงานบริหารงานทั่วไป โรงพยาบาลพังโคน กระทรวงสาธารณสุข
                 </Dialog.Description>
               </div>
             </div>
@@ -286,7 +286,7 @@ export const Skr1Modal: React.FC<Props> = ({ open, onClose, fy, mode, notify }) 
                     แบบสรุปผลการดำเนินการจัดซื้อจัดจ้างในรอบเดือน {monthName} พ.ศ. {selectedYear}
                   </h3>
                   <h4 className="mt-1 font-prompt text-sm font-semibold text-ink-2">
-                    (ชื่อหน่วยงาน) กองโรคติดต่อทั่วไป กรมควบคุมโรค กระทรวงสาธารณสุข
+                    (ชื่อหน่วยงาน) กลุ่มงานบริหารงานทั่วไป โรงพยาบาลพังโคน กระทรวงสาธารณสุข
                   </h4>
                   <p className="mt-1 text-xs text-ink-5 print:text-[10px]">
                     พบรายการจัดซื้อจัดจ้าง {items.length.toLocaleString('th-TH')} รายการ · วงเงินงบประมาณรวม {money(totals.budget)} บาท · ราคาที่ตกลงรวม {money(totals.agreed)} บาท

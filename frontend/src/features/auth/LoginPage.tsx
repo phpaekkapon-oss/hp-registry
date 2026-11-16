@@ -243,7 +243,7 @@ export const LoginPage: React.FC = () => {
             </div>
             <div className="leading-tight">
               <p className="text-lg font-semibold tracking-wide">ระบบงานพัสดุ</p>
-              <p className="text-sm text-white/75">กองโรคติดต่อทั่วไป กรมควบคุมโรค</p>
+              <p className="text-sm text-white/75">กลุ่มงานบริหารงานทั่วไป โรงพยาบาลพังโคน</p>
             </div>
           </div>
 
@@ -300,7 +300,7 @@ export const LoginPage: React.FC = () => {
             </div>
             <div className="leading-tight">
               <p className="text-lg font-semibold">ระบบงานพัสดุ</p>
-              <p className="text-sm text-ink-4">กองโรคติดต่อทั่วไป กรมควบคุมโรค</p>
+              <p className="text-sm text-ink-4">กลุ่มงานบริหารงานทั่วไป โรงพยาบาลพังโคน</p>
             </div>
           </div>
 
