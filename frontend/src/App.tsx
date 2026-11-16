@@ -219,8 +219,19 @@ function AppShell({ user, onLogout }: { user: AuthUser; onLogout: () => Promise<
     root.style.setProperty('--brand-primary', activeTheme.hex);
     root.style.setProperty('--brand-primary-hover', activeTheme.hoverHex);
     root.style.setProperty('--token-radius-card', radiusToken);
-    setBrowserThemeColor(isDarkMode ? '#0D1424' : '#FFFFFF');
     root.classList.toggle('dark', isDarkMode);
+    // The installed-app title bar must match the header, which in dark mode is the brand-tinted chrome surface
+    // (it changes with the chosen theme colour), so read the real colour instead of a fixed one.
+    let titleBar = isDarkMode ? '#0D1424' : '#FFFFFF';
+    if (isDarkMode) {
+      const probe = document.createElement('span');
+      probe.style.cssText = 'position:absolute;visibility:hidden;background-color:var(--token-surface-chrome)';
+      document.body.appendChild(probe);
+      const resolved = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      if (/^rgb/.test(resolved)) titleBar = resolved;
+    }
+    setBrowserThemeColor(titleBar);
 
     try {
       localStorage.setItem('his_egov_theme_id', activeTheme.id);
