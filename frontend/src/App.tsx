@@ -229,7 +229,16 @@ function AppShell({ user, onLogout }: { user: AuthUser; onLogout: () => Promise<
       document.body.appendChild(probe);
       const resolved = getComputedStyle(probe).backgroundColor;
       probe.remove();
-      if (/^rgb/.test(resolved)) titleBar = resolved;
+      // Chrome serialises colour-mix() results as color(srgb ...), so normalise through a 1px canvas to plain RGB
+      const ctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+      if (ctx && resolved) {
+        ctx.canvas.width = ctx.canvas.height = 1;
+        ctx.fillStyle = '#000000';
+        ctx.fillStyle = resolved;
+        ctx.fillRect(0, 0, 1, 1);
+        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+        titleBar = `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+      }
     }
     setBrowserThemeColor(titleBar);
 
