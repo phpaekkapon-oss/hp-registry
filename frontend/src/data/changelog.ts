@@ -17,6 +17,16 @@ export interface ReleaseNote {
  */
 export const CHANGELOG: ReleaseNote[] = [
   {
+    version: '1.0.13',
+    date: '2026-11-16',
+    at: '2026-11-16T02:05:23.237Z',
+    title: "ปรับปรุงแถบเมนูและหน้าจอหลัก",
+    kind: 'patch',
+    highlights: [
+      "ปรับปรุงแถบเมนูและหน้าจอหลัก",
+    ],
+  },
+  {
     version: '1.0.12',
     date: '2026-11-16',
     at: '2026-11-16T02:00:44.393Z',

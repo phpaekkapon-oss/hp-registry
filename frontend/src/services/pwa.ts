@@ -83,6 +83,12 @@ export interface InstallState {
 
 export function useInstallApp(): InstallState {
   const [, force] = useState(0);
+  // Installed on this computer but currently open in a normal browser tab: Chrome sends no install prompt then
+  const [installedElsewhere, setInstalledElsewhere] = useState(false);
+
+  useEffect(() => {
+    void isAlreadyInstalled().then((v) => setInstalledElsewhere(v === true));
+  }, []);
 
   useEffect(() => {
     const update = () => force((n) => n + 1);
@@ -100,7 +106,7 @@ export function useInstallApp(): InstallState {
     notify();
   }, []);
 
-  const installed = typeof window !== 'undefined' && isStandalone();
+  const installed = (typeof window !== 'undefined' && isStandalone()) || installedElsewhere;
   return {
     canInstall: !installed && deferredPrompt !== null,
     installed,

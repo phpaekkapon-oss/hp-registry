@@ -629,16 +629,16 @@ export const Header: React.FC<HeaderProps> = ({
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
           </button>
 
-          {/* One-click install, only while the browser is offering it (otherwise the user menu explains how) */}
-          {installApp.canInstall && (
+          {/* Install icon (48x48px): one-click when the browser offers it, otherwise opens the how-to dialog. Hidden once installed. */}
+          {!installApp.installed && (
             <button
               type="button"
-              onClick={() => void installApp.install()}
-              title="ติดตั้งระบบงานพัสดุเป็นแอปบนเครื่องนี้ (เปิดเป็นหน้าต่างเฉพาะ มีไอคอนบนเดสก์ท็อป)"
-              className="hidden lg:inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] px-3.5 text-sm font-semibold text-ink-2 hover:bg-slate-50 dark:hover:bg-[var(--token-surface-elevated)] transition-colors cursor-pointer"
+              onClick={() => (installApp.canInstall ? void installApp.install() : setInstallHelpOpen(true))}
+              aria-label="ติดตั้งเป็นแอป"
+              title={installApp.canInstall ? 'ติดตั้งระบบงานพัสดุเป็นแอปบนเครื่องนี้' : 'วิธีติดตั้งเป็นแอป'}
+              className="hidden sm:inline-flex min-w-[48px] min-h-[48px] rounded-lg border border-slate-200 dark:border-[var(--token-border-subtle)] bg-white dark:bg-[var(--token-surface-card)] hover:bg-slate-50 dark:hover:bg-[var(--token-surface-elevated)] items-center justify-center text-ink-3 transition-colors cursor-pointer"
             >
               <Download className="w-4 h-4" aria-hidden />
-              ติดตั้งแอป
             </button>
           )}
 
