@@ -106,7 +106,8 @@ export function useInstallApp(): InstallState {
     notify();
   }, []);
 
-  const installed = (typeof window !== 'undefined' && isStandalone()) || installedElsewhere;
+  // A live install prompt proves the app is NOT installed, so it overrides the related-apps check
+  const installed = (typeof window !== 'undefined' && isStandalone()) || (installedElsewhere && deferredPrompt === null);
   return {
     canInstall: !installed && deferredPrompt !== null,
     installed,

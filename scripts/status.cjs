@@ -142,7 +142,9 @@ console.log('');
 console.log(`${C.cyan}  ${RULE}${C.reset}`);
 if (problems.length === 0) {
   console.log(`${C.green}   ✔  สรุป: ระบบพร้อมใช้งานปกติ${C.reset}`);
-  console.log(`${C.dim}      เปิดใช้งานที่ http://${HOST}/${APP}/${C.reset}`);
+  console.log(`${C.dim}      IP เซิร์ฟเวอร์ : ${HOST}${C.reset}`);
+  console.log(`${C.dim}      เว็บภายใน     : http://${HOST}/${APP}/${C.reset}`);
+  console.log(`${C.dim}      เว็บจริง       : ${process.env.PUBLIC_URL || `https://pkhospital.moph.go.th/${APP}/`}${C.reset}`);
 } else {
   console.log(`${C.red}   ✖  สรุป: พบสิ่งที่ต้องแก้ ${problems.length} รายการ${C.reset}`);
   for (const p of problems) console.log(`${C.yellow}      • ${p}${C.reset}`);

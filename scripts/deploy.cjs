@@ -30,6 +30,7 @@ const DEPLOY_PORT = process.env.DEPLOY_PORT || '22';
 const DEPLOY_USER = process.env.DEPLOY_USER || 'srimuang';
 const DEPLOY_DIR  = process.env.DEPLOY_DIR  || '/var/www/html/hp-registry';
 const DEPLOY_APP  = process.env.DEPLOY_APP  || 'hp-registry';
+const PUBLIC_URL  = process.env.PUBLIC_URL  || `https://pkhospital.moph.go.th/${DEPLOY_APP}/`;
 
 // ---- คำสั่งล้างรหัสผ่าน: node scripts/deploy.cjs reset-pwd ----
 const args = process.argv.slice(2);
@@ -332,6 +333,9 @@ console.log('');
 console.log(`${C.green}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C.reset}`);
 console.log(`${C.green}   ✔  นำระบบขึ้นเซิร์ฟเวอร์เรียบร้อยแล้ว พร้อมใช้งานทันที!${C.reset}`);
 console.log(`${C.green}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C.reset}`);
+console.log(`${C.cyan}   IP เซิร์ฟเวอร์ : ${DEPLOY_HOST}${C.reset}`);
+console.log(`${C.cyan}   เว็บภายใน     : http://${DEPLOY_HOST}/${DEPLOY_APP}/${C.reset}`);
+console.log(`${C.cyan}   เว็บจริง       : ${PUBLIC_URL}${C.reset}`);
 console.log('');
 process.exit(0);
 
