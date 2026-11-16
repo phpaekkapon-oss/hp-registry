@@ -1182,8 +1182,8 @@ textarea:focus-visible {
   --sb-bg: #0f1623;
   /* Text ramp: one consistent ladder everywhere — fg (active/titles) > muted (idle items) > faint (captions) */
   --sb-fg: rgba(255, 255, 255, 0.98);
-  --sb-muted: rgba(255, 255, 255, 0.78);
-  --sb-faint: rgba(255, 255, 255, 0.55);
+  --sb-muted: rgba(255, 255, 255, 0.92);
+  --sb-faint: rgba(255, 255, 255, 0.74);
   --sb-hover: rgba(255, 255, 255, 0.07);
   --sb-active-bg: rgba(255, 255, 255, 0.16);
   --sb-active-fg: #ffffff;
@@ -1210,8 +1210,8 @@ aside.app-sidebar {
 :root:not(.dark)[data-sidebar-style="tint"] aside.app-sidebar,
 :root:not(.dark)[data-sidebar-style="gradient"] aside.app-sidebar {
   --sb-fg: #0f172a;
-  --sb-muted: rgba(15, 23, 42, 0.75);
-  --sb-faint: rgba(15, 23, 42, 0.52);
+  --sb-muted: rgba(15, 23, 42, 0.86);
+  --sb-faint: rgba(15, 23, 42, 0.68);
   --sb-hover: color-mix(in srgb, var(--brand-primary) 8%, transparent);
   --sb-active-bg: color-mix(in srgb, var(--brand-primary) 15%, #ffffff);
   --sb-active-fg: var(--brand-strong);

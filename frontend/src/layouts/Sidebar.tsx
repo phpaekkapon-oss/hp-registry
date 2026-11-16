@@ -326,7 +326,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           className="sb-sublink group flex min-h-[36px] w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left cursor-pointer"
                         >
                           <SubIcon className="w-[17px] h-[17px] shrink-0" strokeWidth={1.8} aria-hidden />
-                          <span className="text-[13px] font-medium truncate">{sub.label}</span>
+                          <span className="text-[13.5px] font-semibold truncate">{sub.label}</span>
                         </button>
                       );
                     })}
