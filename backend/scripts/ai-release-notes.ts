@@ -23,6 +23,7 @@ try {
       version: input.version,
       commits: Array.isArray(input.commits) ? input.commits.map(String).slice(0, 60) : [],
       files: Array.isArray(input.files) ? input.files.map(String).slice(0, 120) : [],
+      diff: typeof input.diff === 'string' ? input.diff.slice(0, 14000) : undefined,
     },
     'deploy'
   );

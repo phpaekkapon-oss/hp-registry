@@ -317,6 +317,8 @@ export interface ReleaseNotesInput {
   version: string;
   commits: string[];
   files: string[];
+  /** Changed lines (git diff, trimmed) so the notes describe what really changed, not just file names */
+  diff?: string;
 }
 
 export interface ReleaseNotes {
@@ -338,6 +340,7 @@ export async function writeReleaseNotes(input: ReleaseNotesInput, runBy: string)
     '',
     'ไฟล์ที่เปลี่ยน:',
     ...input.files.slice(0, 80).map((f) => `- ${f}`),
+    ...(input.diff ? ['', 'บรรทัดที่แก้ไขจริง (ใช้สรุปสิ่งที่ผู้ใช้จะเห็นเปลี่ยน ห้ามคัดลอกโค้ดหรือชื่อไฟล์):', input.diff] : []),
   ].join('\n');
 
   const res = await chat([{ role: 'user', content: prompt }], { purpose: 'release-notes', runBy, maxTokens: 900 });

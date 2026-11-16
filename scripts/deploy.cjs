@@ -130,7 +130,7 @@ function nextVersion(current, kind) {
 }
 
 /** Asks the AI on the server (keys and model order from Settings → AI); null when it cannot */
-function aiNotes(version, commits, files) {
+function aiNotes(version, commits, files, diff) {
   try {
     execSync(`echo y | "${plinkExe}" -ssh -P ${DEPLOY_PORT} -pw "${deployPassword}" ${DEPLOY_USER}@${DEPLOY_HOST} exit`, { stdio: 'ignore' });
   } catch {}
@@ -138,7 +138,7 @@ function aiNotes(version, commits, files) {
   const res = spawnSync(
     plinkExe,
     ['-batch', '-ssh', '-P', DEPLOY_PORT, '-pw', deployPassword, `${DEPLOY_USER}@${DEPLOY_HOST}`, remote],
-    { input: JSON.stringify({ version, commits, files }), encoding: 'utf8', timeout: 240_000 }
+    { input: JSON.stringify({ version, commits, files, diff }), encoding: 'utf8', timeout: 240_000 }
   );
   const line = String(res.stdout || '').split('\n').find((l) => l.startsWith('@@AI@@'));
   if (!line) {
@@ -156,6 +156,9 @@ function aiNotes(version, commits, files) {
 
 // Without the AI, name the parts of the app that changed (from the file paths) instead of a generic line
 const AREAS = [
+  [/pwa\.ts|manifest\.webmanifest|public\/sw/, 'การติดตั้งระบบเป็นแอป'],
+  [/scripts\/(deploy|status)/, 'ขั้นตอนนำระบบขึ้นเซิร์ฟเวอร์'],
+  [/layouts\/Header/, 'แถบด้านบน'],
   [/settings\/BackupSection|services\/backup/, 'หน้าสำรองข้อมูล'],
   [/settings\/(AiSection|aiApi)|services\/ai|routes\/ai/, 'หน้าผู้ช่วย AI'],
   [/features\/settings|routes\/system/, 'หน้าตั้งค่าระบบ'],
@@ -196,6 +199,16 @@ function autoRelease() {
   const committed = lastTag ? git(`diff --name-only ${lastTag}..HEAD`).split('\n').filter(Boolean) : [];
   const files = [...new Set([...committed, ...dirty])];
 
+  // Changed lines of real source (not changelog / lockfile / build output) so the AI can say what actually changed
+  let diff = '';
+  try {
+    diff = git(`diff ${lastTag || 'HEAD~20'} --unified=0 --no-color -- . ":(exclude)package.json" ":(exclude)package-lock.json" ":(exclude)frontend/src/data/changelog.ts" ":(exclude)frontend/dist" ":(exclude)*.png" ":(exclude)*.svg"`)
+      .split('\n')
+      .filter((l) => /^(diff --git|[+-][^+-])/.test(l))
+      .join('\n')
+      .slice(0, 14000);
+  } catch {}
+
   if (commits.length === 0 && dirty.length === 0) {
     console.log(`${C.dim}    ไม่มีการเปลี่ยนแปลงตั้งแต่ ${lastTag || 'ครั้งก่อน'} — ใช้เวอร์ชันเดิม${C.reset}`);
     return;
@@ -213,7 +226,7 @@ function autoRelease() {
     version = patchNext;
     console.log(`${C.dim}    ใช้บันทึก v${version} ที่เขียนไว้แล้วใน changelog.ts${C.reset}`);
   } else {
-    const notes = aiNotes(patchNext, commits, files) || fallbackNotes(commits, files);
+    const notes = aiNotes(patchNext, commits, files, diff) || fallbackNotes(commits, files);
     version = nextVersion(pkg.version, notes.kind);
     const entry = [
       '  {',
